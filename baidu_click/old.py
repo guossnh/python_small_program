@@ -63,7 +63,7 @@ def tryproxy():
         proxy_auth_handler = urllib.request.ProxyBasicAuthHandler()
         opener = urllib.request.build_opener(proxy_handler, proxy_auth_handler)
         try:
-            wocao = opener.open('https://www.zhihu.com/')
+            wocao = opener.open('https://baidu.com')
             print("链接正确")
             if wocao.status == 200:
                 can_use_ip = can_use_ip + 1
