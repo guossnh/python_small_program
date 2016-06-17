@@ -77,7 +77,7 @@ def tryproxy():
             time.sleep(3)
             print("链接出错,休息一下继续")
 
-        print("总共检测ip为%s可用ip为%s"% all_use_ip,can_use_ip)
+        print("总共检测ip为%s可用ip为%s"% (all_use_ip,can_use_ip))
 
 
 
@@ -120,3 +120,13 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+
+
+
+
+
+
+
+
+
