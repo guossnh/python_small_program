@@ -34,21 +34,24 @@ can_use_ip = 0
 
 """
 这是 设置 代理的两个方法
-"""
+""" 
 
 #设置火狐浏览器的代理的办法,非常好用.得区分一下是不是https的链接
 def setHttpsProxy(ip,port):#参数  ip地址   端口  类型   真为https 假为http
     global driver , profile#全局变量
-    profile.set_preference('network.proxy.type', 1)#设置浏览器上完方式为手动
-    if 1==1:
+    try:
+        profile.set_preference('network.proxy.type', 1)#设置浏览器上完方式为手动
+        #if 1==1:
         profile.set_preference('network.proxy.ssl', ip)
         profile.set_preference('network.proxy.ssl_port', port)
-    else:
-        profile.set_preference('network.proxy.http', ip)
-        profile.set_preference('network.proxy.http_port', port)
-    profile.update_preferences()
-    driver = webdriver.Firefox(profile)
-    #man_page_visit()#开始访问
+        #else:
+        #    profile.set_preference('network.proxy.http', ip)
+        #    profile.set_preference('network.proxy.http_port', port)
+        profile.update_preferences()
+        driver = webdriver.Firefox(profile)
+        return True;
+    except:
+        return False;
 
 def tryproxy():
     global all_use_ip , can_use_ip
@@ -61,21 +64,37 @@ def tryproxy():
         proxy_auth_handler = urllib.request.ProxyBasicAuthHandler()
         opener = urllib.request.build_opener(proxy_handler, proxy_auth_handler)
         try:
-            wocao = opener.open('https://www.zhihu.com/')
+            wocao = opener.open('https://baidu.com')#测试链接是否可用
             print("链接正确")
             if wocao.status == 200:
                 can_use_ip = can_use_ip + 1
                 datalist = data.split(":")
-                #print(datalist[0]+"+++++++++++++"+datalist[1])
+                print("代理查找完毕,开始 设置浏览器代理")
                 setHttpsProxy(datalist[0],datalist[1])
             else:
                 pass
         except:
-            time.sleep(5)
-            print("链接出错,休息5个时间")
+            time.sleep(3)
+            print("链接出错,休息一下继续")
 
-        print("总共检测ip为%s"% all_use_ip)
-        print("可用ip为%s"% can_use_ip)
+        print("总共检测ip为%s可用ip为%s"% all_use_ip,can_use_ip)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

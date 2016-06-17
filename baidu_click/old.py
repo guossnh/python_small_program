@@ -76,10 +76,8 @@ def tryproxy():
             time.sleep(5)
             print("链接出错,休息5个时间")
         
-
         print("总共检测ip为%s"% all_use_ip)
         print("可用ip为%s"% can_use_ip)
-
 
 """
 这一部分  是 浏览部分
