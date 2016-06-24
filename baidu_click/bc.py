@@ -28,6 +28,11 @@ profile = webdriver.FirefoxProfile()#设置浏览器基本设置
 all_use_ip = 0
 can_use_ip = 0
 
+#这里是百度 翻页 的数字  写在这里   方便控制   第一个是方法1  第二个 是方法2
+baidupagenumber1 = 5
+baidupagenumber2 = 5
+
+
 """
 下边是方法部分
 """
@@ -97,6 +102,7 @@ def pageReader():
         driver.execute_script("window.scrollBy(0,%s)" % num,"") #最后了  开始 跳转  就酱
 
 
+
 #百度搜索开始搜索方法
 def baidustart(kew):
     global driver , kewword , baiduTitle #引入全局变量
@@ -107,14 +113,9 @@ def baidustart(kew):
     assert baiduTitle in driver.title#确定页面是百度搜索页面
 
 
-
-
 #这个办法主要是 放一些 排除 的网站,然后  其他 的网站   都要 点击
 def noClick():
     driver.execute_script("$('a:contains(315jiage.cn)').parent().parent().remove()","") #排除315价格网
-
-
-
 
 
 #这个方法主要实现的是跳转到百度下一页 的页面.时间 的话   可以 根据 电脑 适当 的调节
@@ -133,48 +134,63 @@ def suiji(sum = 7):
     else:
         return False
 
-
-#单页面的浏览功能
-def baidulist():
-    time.sleep(5) #时间停留5秒 增加系统容错率
-    content_list_num = driver.find_elements_by_tag_name("h3")
-    print("打印出  总共  有几个元素:%s"%len(content_list_num))
-    for x in content_list_num:
-        try:
-            x.find_element_by_tag_name("a").click()
-            time.sleep(5)
-            driver.switch_to_window(driver.window_handles[-1])
-            seePageHead()
-            driver.close()
-            driver.switch_to_window(driver.window_handles[0])
-            time.sleep(5)
-        except:
-            print("wrong")
-    print("it is over")
-
-
 #下边是两套规则
 #规则1  除了过滤器其他的 都点
 def type1():
-    print("ok1")
-#规则2  点击特定的页面   其他的不点
-def type2():
-    print("ok2")
+    time.sleep(5) #时间停留5秒 增加系统容错率
+    i = 0
+    while i<=baidupagenumber1:#这是翻页的循环
+        noClick()#过滤掉不要的链接
+        content_list_num = driver.find_elements_by_tag_name("h3")
+        print("打印出  总共  有几个元素:%s"%len(content_list_num))
+        for x in content_list_num:
+            try:
+                x.find_element_by_tag_name("a").click()
+                time.sleep(5)
+                driver.switch_to_window(driver.window_handles[-1])
+                pageReader()
+                driver.close()
+                driver.switch_to_window(driver.window_handles[0])
+                time.sleep(5)
+            except:
+                print("错误一次")
+        print("结束.开始第二页")
 
+
+#规则2  点击特定的页面   其他的不点
+def type2(link):
+    time.sleep(5) #时间停留5秒 增加系统容错率
+    i = 0
+    while i<=baidupagenumber1:#这是翻页的循环
+        content_list_num = driver.find_element_by_partial_link_text(link)
+        print("本页发现元素:%s个"%len(content_list_num))
+        for x in content_list_num:
+            try:
+                x.find_element_by_partial_link_text(link).click()
+                time.sleep(5)
+                driver.switch_to_window(driver.window_handles[-1])
+                pageReader()
+                driver.close()
+                driver.switch_to_window(driver.window_handles[0])
+                time.sleep(5)
+                print("找到链接,并且浏览成功")
+            except:
+                pass
+        print("结束.开始第二页")
 
 def readFile():
+    global driver #引入全局变量
     with open('date.csv', "rt" , encoding="utf8") as f:
         f_csv = csv.reader(f)
         headers = next(f_csv)
         for row in f_csv:
+            #在这里 打开浏览器然后 分开浏览
+            baidustart(row[1])
             if row[0]=='1':
-                type1()
+                #type1()
             else:
-                type2()
-
-
-
-
+                #type2(row[2])
+            driver.close()#关闭网页
 
 #主程序
 def main():
