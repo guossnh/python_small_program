@@ -36,6 +36,9 @@ baidupagenumber2 = 5
 bc_ip = ""
 bc_proxy = ""
 
+#firefox 用户配置文件地址
+profileDir = "C:\\Users\\Administrator\\AppData\\Roaming\\Mozilla\\Firefox\\Profiles\\witrfxpv.default"
+
 """
 下边是方法部分
 """
@@ -47,7 +50,7 @@ bc_proxy = ""
 #设置火狐浏览器的代理的办法,非常好用.得区分一下是不是https的链接
 def setHttpsProxy(ip,port):#参数  ip地址   端口  类型   真为https 假为http
     global driver , profile#全局变量
-    profile = webdriver.FirefoxProfile()
+    profile = webdriver.FirefoxProfile(profileDir)
     try:
         profile.set_preference('network.proxy.type', 1)#设置浏览器上完方式为手动
         #if 1==1:
@@ -214,7 +217,6 @@ def main():
             if tryproxy():
                 break
         #开始设置  这里一般的话 不会出错   直接写了
-        
         # if setHttpsProxy(bc_ip , bc_proxy):
         #     print("设置成功")
         # else:
