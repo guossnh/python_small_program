@@ -22,7 +22,7 @@ baiduTitle = kewword + "_百度搜索"
 
 driver = ""#= webdriver.Firefox()#确定浏览器
 
-profile = webdriver.FirefoxProfile()#设置浏览器基本设置
+profile = ""#设置浏览器基本设置
 
 #代理的两个变量  用于 计数
 all_use_ip = 0
@@ -33,8 +33,8 @@ baidupagenumber1 = 5
 baidupagenumber2 = 5
 
 #两个变量设置代理的ip和端口
-bc_ip
-bc_proxy
+bc_ip = ""
+bc_proxy = ""
 
 """
 下边是方法部分
@@ -47,6 +47,7 @@ bc_proxy
 #设置火狐浏览器的代理的办法,非常好用.得区分一下是不是https的链接
 def setHttpsProxy(ip,port):#参数  ip地址   端口  类型   真为https 假为http
     global driver , profile#全局变量
+    profile = webdriver.FirefoxProfile()
     try:
         profile.set_preference('network.proxy.type', 1)#设置浏览器上完方式为手动
         #if 1==1:
@@ -111,11 +112,8 @@ def pageReader():
 #百度搜索开始搜索方法
 def baidustart(kew):
     global driver , kewword , baiduTitle #引入全局变量
-
-
     #driver = webdriver.Firefox()#这句话  测试完 之后 要 删除的
-
-
+    setHttpsProxy(bc_ip , bc_proxy)#设置浏览器的代理
     kewword = kew
     time.sleep(5)
     driver.get("https://www.baidu.com/s?wd="+kewword)#开始搜索关键字
@@ -126,6 +124,7 @@ def baidustart(kew):
 #这个办法主要是 放一些 排除 的网站,然后  其他 的网站   都要 点击
 def noClick():
     driver.execute_script("$('a:contains(315jiage.cn)').parent().parent().remove()","") #排除315价格网
+    driver.execute_script("$('h3:contains(九制黄精饮什么牌子的是真药?另外一盒多少钱?_百度知道)').parent().remove()","")#一个百度知道 
 
 
 #这个方法主要实现的是跳转到百度下一页 的页面.时间 的话   可以 根据 电脑 适当 的调节
@@ -166,6 +165,7 @@ def type1():
                     time.sleep(5)
                 except:
                     print("错误一次")
+                baiduNextPage()
         print("结束.开始第二页")
 
 
@@ -215,10 +215,10 @@ def main():
                 break
         #开始设置  这里一般的话 不会出错   直接写了
         
-        if setHttpsProxy(bc_ip , bc_proxy):
-            print("设置成功")
-        else:
-            print("卧槽这么简单 的还会 出错")
+        # if setHttpsProxy(bc_ip , bc_proxy):
+        #     print("设置成功")
+        # else:
+        #     print("卧槽这么简单 的还会 出错")
         #读取配置文件获取
         readFile()
 
