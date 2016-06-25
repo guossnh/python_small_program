@@ -1,5 +1,5 @@
 #更新一下 百度点击 的程序  需要增加 一些功能 
-#gui 界面  ,exe 打包  关键词 用户 自己 添加  更改 这次 努力 完善一下 
+#  关键词 用户 自己 添加  更改 这次 努力 完善一下 
 
 #-*- coding : utf-8 -*-
 
@@ -32,6 +32,9 @@ can_use_ip = 0
 baidupagenumber1 = 5
 baidupagenumber2 = 5
 
+#两个变量设置代理的ip和端口
+bc_ip
+bc_proxy
 
 """
 下边是方法部分
@@ -59,30 +62,32 @@ def setHttpsProxy(ip,port):#参数  ip地址   端口  类型   真为https 假�
         return False;
 
 def tryproxy():
-    global all_use_ip , can_use_ip
-    while True:
-        all_use_ip = all_use_ip + 1 
-        data = ''
-        with urllib.request.urlopen('http://qsrdk.daili666api.com/ip/?tid=556258590050521&num=1&category=2&protocol=https&foreign=none&filter=on') as f:
-            data = f.read().decode()
-        proxy_handler = urllib.request.ProxyHandler({'https': data})
-        proxy_auth_handler = urllib.request.ProxyBasicAuthHandler()
-        opener = urllib.request.build_opener(proxy_handler, proxy_auth_handler)
-        try:
-            wocao = opener.open('https://baidu.com')#测试链接是否可用
-            print("链接正确")
-            if wocao.status == 200:
-                can_use_ip = can_use_ip + 1
-                datalist = data.split(":")
-                print("代理查找完毕,开始 设置浏览器代理")
-                setHttpsProxy(datalist[0],datalist[1])
-            else:
-                pass
-        except:
-            time.sleep(3)
-            print("链接出错,休息一下继续")
-
-        print("总共检测ip为%s可用ip为%s"% (all_use_ip,can_use_ip))
+    global all_use_ip , can_use_ip , bc_ip , bc_proxy
+    all_use_ip = all_use_ip + 1 
+    data = ''
+    with urllib.request.urlopen('http://qsrdk.daili666api.com/ip/?tid=556258590050521&num=1&category=2&protocol=https&foreign=none&filter=on') as f:
+        data = f.read().decode()
+    proxy_handler = urllib.request.ProxyHandler({'https': data})
+    proxy_auth_handler = urllib.request.ProxyBasicAuthHandler()
+    opener = urllib.request.build_opener(proxy_handler, proxy_auth_handler)
+    try:
+        wocao = opener.open('https://baidu.com')#测试链接是否可用
+        print("链接正确")
+        if wocao.status == 200:
+            can_use_ip = can_use_ip + 1
+            datalist = data.split(":")
+            print("代理查找完毕,开始 设置浏览器代理")
+            bc_ip = datalist[0]
+            bc_proxy = datalist[1]
+            return True
+            #setHttpsProxy(datalist[0],datalist[1])
+        else:
+            return False
+    except:
+        time.sleep(3)
+        print("链接出错")
+        return False
+    print("总共检测ip为%s可用ip为%s"% (all_use_ip,can_use_ip))
 
 
 
@@ -106,6 +111,11 @@ def pageReader():
 #百度搜索开始搜索方法
 def baidustart(kew):
     global driver , kewword , baiduTitle #引入全局变量
+
+
+    #driver = webdriver.Firefox()#这句话  测试完 之后 要 删除的
+
+
     kewword = kew
     time.sleep(5)
     driver.get("https://www.baidu.com/s?wd="+kewword)#开始搜索关键字
@@ -140,20 +150,22 @@ def type1():
     time.sleep(5) #时间停留5秒 增加系统容错率
     i = 0
     while i<=baidupagenumber1:#这是翻页的循环
+        i = i + 1
         noClick()#过滤掉不要的链接
         content_list_num = driver.find_elements_by_tag_name("h3")
         print("打印出  总共  有几个元素:%s"%len(content_list_num))
         for x in content_list_num:
-            try:
-                x.find_element_by_tag_name("a").click()
-                time.sleep(5)
-                driver.switch_to_window(driver.window_handles[-1])
-                pageReader()
-                driver.close()
-                driver.switch_to_window(driver.window_handles[0])
-                time.sleep(5)
-            except:
-                print("错误一次")
+            if suiji():
+                try:
+                    x.find_element_by_tag_name("a").click()
+                    time.sleep(5)
+                    driver.switch_to_window(driver.window_handles[-1])
+                    pageReader()
+                    driver.close()
+                    driver.switch_to_window(driver.window_handles[0])
+                    time.sleep(5)
+                except:
+                    print("错误一次")
         print("结束.开始第二页")
 
 
@@ -161,22 +173,21 @@ def type1():
 def type2(link):
     time.sleep(5) #时间停留5秒 增加系统容错率
     i = 0
-    while i<=baidupagenumber1:#这是翻页的循环
-        content_list_num = driver.find_element_by_partial_link_text(link)
-        print("本页发现元素:%s个"%len(content_list_num))
-        for x in content_list_num:
-            try:
-                x.find_element_by_partial_link_text(link).click()
-                time.sleep(5)
-                driver.switch_to_window(driver.window_handles[-1])
-                pageReader()
-                driver.close()
-                driver.switch_to_window(driver.window_handles[0])
-                time.sleep(5)
-                print("找到链接,并且浏览成功")
-            except:
-                pass
-        print("结束.开始第二页")
+    while i<=baidupagenumber2:#这是翻页的循环
+        i= i + 1
+        try:
+            driver.find_element_by_partial_link_text(link).click()
+            time.sleep(5)
+            driver.switch_to_window(driver.window_handles[-1])
+            pageReader()
+            driver.close()
+            driver.switch_to_window(driver.window_handles[0])
+            time.sleep(5)
+            print("找到链接,并且浏览成功")
+        except:
+            print("没找到")
+        baiduNextPage()
+    print("结束.离开")
 
 def readFile():
     global driver #引入全局变量
@@ -186,20 +197,30 @@ def readFile():
         for row in f_csv:
             #在这里 打开浏览器然后 分开浏览
             baidustart(row[1])
-            if row[0]=='1':
-                #type1()
+            if row[0]=='1' and suiji(8):
+                type2(row[2])
+            elif suiji(8):
+                type1()
             else:
-                #type2(row[2])
+                print("运气不好这一次没有被随机到哎")
             driver.close()#关闭网页
-
 #主程序
 def main():
-    
-    #tryproxy()  #查找代理 并且设置
-
-    #读取配置文件获取
-    readFile()
-
+    global bc_proxy , bc_ip
+    while True:
+        #分步走开始  :)
+        #查找可用代理
+        while True:
+            if tryproxy():
+                break
+        #开始设置  这里一般的话 不会出错   直接写了
+        
+        if setHttpsProxy(bc_ip , bc_proxy):
+            print("设置成功")
+        else:
+            print("卧槽这么简单 的还会 出错")
+        #读取配置文件获取
+        readFile()
 
 
 if __name__ == '__main__':
