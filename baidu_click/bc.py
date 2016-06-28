@@ -158,6 +158,7 @@ def type1():
         print("打印出  总共  有几个元素:%s"%len(content_list_num))
         for x in content_list_num:
             if suiji():
+                print("随机数打印到了")
                 try:
                     x.find_element_by_tag_name("a").click()
                     time.sleep(5)
@@ -168,7 +169,9 @@ def type1():
                     time.sleep(5)
                 except:
                     print("错误一次")
-                baiduNextPage()
+            else:
+                print("随机数没有打印到")
+        baiduNextPage()
         print("结束.开始第二页")
 
 
@@ -227,13 +230,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
-
-
-
-
-
-
-
-
-
