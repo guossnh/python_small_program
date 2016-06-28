@@ -153,6 +153,7 @@ def type1():
     i = 0
     while i<=baidupagenumber1:#这是翻页的循环
         i = i + 1
+        time.sleep(3)
         noClick()#过滤掉不要的链接
         content_list_num = driver.find_elements_by_tag_name("h3")
         print("打印出  总共  有几个元素:%s"%len(content_list_num))
