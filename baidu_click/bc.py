@@ -210,7 +210,7 @@ def readFile():
                 type1()
             else:
                 print("运气不好这一次没有被随机到哎")
-            driver.close()#关闭网页
+            driver.quit()#关闭网页
 #主程序
 def main():
     global bc_proxy , bc_ip
