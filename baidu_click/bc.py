@@ -187,7 +187,7 @@ def type2(link):
             time.sleep(5)
             driver.switch_to_window(driver.window_handles[-1])
             pageReader()
-            driver.quit()
+            driver.close()
             driver.switch_to_window(driver.window_handles[0])
             time.sleep(5)
             print("找到链接,并且浏览成功")
@@ -210,7 +210,7 @@ def readFile():
                 type1()
             else:
                 print("运气不好这一次没有被随机到哎")
-            driver.quit()#关闭网页
+            driver.close()#关闭网页
 #主程序
 def main():
     global bc_proxy , bc_ip
@@ -226,7 +226,13 @@ def main():
         # else:
         #     print("卧槽这么简单 的还会 出错")
         #读取配置文件获取
-        readFile()
+        try:
+            readFile()
+        except:
+            driver.quit()
+            print("程序出现错误,然后 关闭 所有 停留30秒之后开始继续")
+            time.sleep(30)
+        
 
 
 if __name__ == '__main__':
