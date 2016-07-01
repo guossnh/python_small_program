@@ -127,7 +127,9 @@ def baidustart(kew):
 #这个办法主要是 放一些 排除 的网站,然后  其他 的网站   都要 点击
 def noClick():
     driver.execute_script("$('a:contains(315jiage.cn)').parent().parent().remove()","") #排除315价格网
-    driver.execute_script("$('h3:contains(九制黄精饮什么牌子的是真药?另外一盒多少钱?_百度知道)').parent().remove()","")#一个百度知道 
+    driver.execute_script("$('h3:contains(九制黄精饮什么牌子的是真药?另外一盒多少钱?_百度知道)').parent().remove()","")#一个百度知道
+    driver.execute_script("$('h3:contains(请问阿胶黄精丸是不是吃死过人啊?_百度知道)').parent().remove()","")
+    driver.execute_script("$('h3:contains(阿胶黄精丸价格多少钱一瓶?是不是真药?的评论_第2页)').parent().remove()","")
 
 
 #这个方法主要实现的是跳转到百度下一页 的页面.时间 的话   可以 根据 电脑 适当 的调节
