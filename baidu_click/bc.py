@@ -206,7 +206,7 @@ def readFile():
         for row in f_csv:
             #在这里 打开浏览器然后 分开浏览
             baidustart(row[1])
-            if row[0]=='1' and suiji(7):
+            if row[0]=='1' and suiji(5):
                 type2(row[2])
             elif suiji(7):
                 type1()
