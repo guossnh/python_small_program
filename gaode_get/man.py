@@ -5,6 +5,7 @@
 #导包
 import urllib
 from urllib import request
+import sqlite3
 
 #常量 
 #洗浴推拿 编号 071400  
@@ -17,6 +18,17 @@ gaode_link = ""
 goade_link_other_kew = "&offset=50&citylimit=true&types=071400"
 city = ""
 
+conn = sqlite3.connect('gaode.db')
+
+
+"""
+上边是变量
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~变态的分割线~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+下边是程序
+"""
+
+
+
 
 def getlink():
     pass
@@ -26,10 +38,16 @@ def tryit():
          print(f.read())
 
 
+def dbadd(id,name,type,typecode,biz_type,address,tel,distance,biz_ext,pname,cityname,adname):
+    conn.execute("insert into gaode (id,name,type,typecode,biz_type,address,tel,distance,biz_ext,pname,cityname,adname) values ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s')" %(id,name,type,typecode,biz_type,address,tel,distance,biz_ext,pname,cityname,adname))
+    conn.commit()
+
 
 #主函数
 def main():
-    tryit()
+    conn = sqlite3.connect('gaode.db')
+    dbadd("B000A88EEK", "艺海国际商务会馆(联想桥店)", "生活服务;洗浴推拿场所;洗浴推拿场所","071400","", "皂君庙路2号","010-62166216", "","", "北京市", "北京市", "海淀区")
+    conn.close()
 
 if __name__ == '__main__':
     main()
