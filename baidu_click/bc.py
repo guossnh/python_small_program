@@ -3,7 +3,6 @@
 
 #-*- coding : utf-8 -*-
 
-
 #还是导包  真JB烦人  
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
@@ -61,9 +60,9 @@ def setHttpsProxy(ip,port):#参数  ip地址   端口  类型   真为https 假�
         #    profile.set_preference('network.proxy.http_port', port)
         profile.update_preferences()
         driver = webdriver.Firefox(profile)
-        return True;
+        return True
     except:
-        return False;
+        return False
 
 def tryproxy():
     global all_use_ip , can_use_ip , bc_ip , bc_proxy
@@ -95,20 +94,41 @@ def tryproxy():
 
 
 
-
-#这个方法主要是页面移动停留的办法   想想我觉得这个方法是骗自己的 https的代理  不是 http的代理
-def pageReader():
+"""
+这个方法主要是页面移动停留的办法   想想我觉得这个方法是骗自己的 https的代理  不是 http的代理
+2016年7月18日  添加  
+更新,添加 参数 循环次数times , stoptimes  前者是本次循环的次数, stoptime  是页面  停留时间  默认的话   规定3分钟吧循环次数默认4~10
+停留时间对于百度 来说 是 有意义的,从列表页面 的跳转到恢复时间  计算 页面  浏览 时间   是可行 的办法
+"""
+def pageReader(times = 10, stoptimes = 3):
     global driver#全局变量
-    time.sleep(3) #先休息3秒防止出错
+    time.sleep(stoptimes*60) #先休息3秒防止出错
     num = 180   #固定值是180根据百度搜多搜索页面高度1879
-    for x in range(1,int(random.uniform(4,10))): #循环  设置循环表示要跳转几次. 上线 的话 可以多添加 几次
+    for x in range(1,int(random.uniform(4,times))): #循环  设置循环表示要跳转几次. 上线 的话 可以多添加 几次
         time.sleep(2)   #每次循环之后 添加停留时间  增加容错率
-        if random.sample([0,1],1) == 1:     #这条判断是随机表示跳转
+        #if random.sample([0,1],1) == 1:     #这条判断是随机表示跳转
+        if suiji(5):
             num = num + 180  
         else:
             num = abs(num - 180)
         #num = abs(num + int(random.sample([180,-180],1)))   #这种写法更吊  但是  出错  有时间看看 修改一下
         driver.execute_script("window.scrollBy(0,%s)" % num,"") #最后了  开始 跳转  就酱
+
+
+
+#这个页面 是百度 搜索 列表的阅读 页面   不知带 有用没  先 用用吧
+def baidu_list_page_reader():
+    global driver#全局变量
+    time.sleep(5) #先休息5秒防止出错
+    num = 180   #固定值是180根据百度搜多搜索页面高度1879
+    #先要 跳转到 页面 最下边
+    for x in xrange(1,11):
+        driver.execute_script("window.scrollBy(0,%s)" %(x*num),"") #最后了  开始 跳转  就酱
+    #之后开始 随机跳转
+    pageReader()
+
+
+
 
 
 
