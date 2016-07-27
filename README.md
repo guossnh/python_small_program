@@ -8,3 +8,9 @@ baidu_click
 
 gaode_get
 这是一个通过高的api获取地图信息的小程序  就酱
+
+
+
+get_meituan
+这是一个获取美团特定分类的程序,不算是爬虫   都没用爬虫框架
+
