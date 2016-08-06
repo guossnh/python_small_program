@@ -131,9 +131,6 @@ def baidu_list_page_reader():
 
 
 
-
-
-
 #百度搜索开始搜索方法
 def baidustart(kew):
     global driver , kewword , baiduTitle #引入全局变量
