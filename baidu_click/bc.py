@@ -1,21 +1,16 @@
-#更新一下 百度点击 的程序  需要增加 一些功能
-#  关键词 用户 自己 添加  更改 这次 努力 完善一下
-
 #-*- coding : utf-8 -*-
+#更新一下 百度点击 的程序  需要增加 一些功能  关键词 用户 自己 添加  更改 这次 努力 完善一下
 
 #还是导包  真JB烦人
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import Select
-import time #导入时间包
-import random #导入随机数包
-import string #导入string包
-import urllib
-import binascii
-import csv  #引入csv文件
-import json
+import time , random , string , urllib , binascii , csv , json
 
 #这里放一些变量
+config = "" #这是配置文件的系统变量
+config_file = "/config.json"
+
 kewword = ""
 
 baiduTitle = kewword + "_百度搜索"
