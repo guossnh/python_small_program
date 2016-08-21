@@ -263,9 +263,7 @@ def wile_be_start():
 
 
 
-
-
 if __name__ == '__main__':
     #main()
     pass
-    noClick()
+
