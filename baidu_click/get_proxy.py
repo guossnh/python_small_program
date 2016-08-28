@@ -31,7 +31,13 @@ def tryproxy():
     print("总共检测ip为%s可用ip为%s"% (all_use_ip,can_use_ip))
 
 def get_proxy():
-    pass
+    data = '' #这是放获取的内容的变量
+    with urllib.request.urlopen(read_config.value('get_ip_link')) as f:
+        data  = f.read().decode()
+    proxy_handler = urllib.request.ProxyHandler({'https': data})
+    proxy_auth_handler = urllib.request.ProxyBasicAuthHandler()
+    #opener = urllib.request.build_opener(proxy_handler, proxy_auth_handler)
+    
 
 def try_proxy(proxy):
     proxy = "http://"+proxy
