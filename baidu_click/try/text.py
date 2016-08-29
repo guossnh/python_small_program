@@ -33,11 +33,13 @@ def text2():
     #设置useragent
     #profile.set_preference('general.useragent.override', "wocao")
     driver = webdriver.Firefox(profile)
-    driver.get("http://sunchateau.com/free/UA.htm")
-    time.sleep(3)
+    #driver.get("http://sunchateau.com/free/UA.htm")
+    driver.get("http://baidu.com")
+    #time.sleep(3)
     #driver.maximize_window()
     #设置 窗口 的大小
     driver.set_window_size(200 , 100)
+    time.sleep(3)
     print("ok")
 
     #driver.close()
@@ -63,7 +65,7 @@ def text4():
 
 #***************************************************变态的分割线*********************************************************
 #
-text4()
+text2()
 #打印时间
 print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) )
 #

@@ -9,3 +9,18 @@
     6,程序写得再完整一点.稳定一点.
 
 先这样    
+
+
+
+#文档结构
+
+    read_config.py      这是读取配置文件的模块
+    date.csv            这是记录点击关键词的csv
+    bc.py               这是第2.0的主模块现在已经修改 的不能使用
+    browser.json        这是浏览器的useragent的文件
+    config.json         这是配置文件json格式
+    get_proxy.json      获取代理地址的模块
+    no_click.json       不点击的列表
+    old.py              这是1.0的主模块,现在已经弃用.
+    try.py              这是测试模块是否可用的文件,主要测试使用.
+    man.py              这是3.0的主模块,今天开始写
