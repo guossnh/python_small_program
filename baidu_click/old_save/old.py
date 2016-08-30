@@ -1,7 +1,5 @@
-#这是一个模拟百度点击的程序就酱
-
 #-*- coding : utf-8 -*-
-
+#这是一个模拟百度点击的程序就酱  1.0
 #导入包
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
