@@ -213,7 +213,7 @@ def type2(link):
             driver.close()
             driver.switch_to_window(driver.window_handles[0])
             time.sleep(5)
-            print("找到链接,并且浏览成功")
+            print("找到链接,并且浏览成功")    
         except:
             print("没找到")
         baiduNextPage()
