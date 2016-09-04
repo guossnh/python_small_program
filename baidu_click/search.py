@@ -4,17 +4,21 @@
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import Select
-import time , random , string  , binascii , csv , json
+import time , random , string  , binascii , csv , json ,sys 
 #下边是自己的模块
 import read_config
 
 #这里是全局变量
 driver = "" #这是浏览器对象
 
+profile = ""#设置浏览器基本设置
+
+baiduTitle = ""#设置百度标题
+
 #这是初始化浏览器的办法
 def setHttpsProxy(ip,port,useragent = "",is_phone = False):#参数  ip地址   端口  这是useragent
     global driver , profile#全局变量
-    profile = webdriver.FirefoxProfile(read_config.value("firfox_default_file"))
+    profile = webdriver.FirefoxProfile(read_config.value("firfox_default_file"))#使用本地的firfox的配置文件
     try:
         profile.set_preference('network.proxy.type', 1)#设置浏览器上完方式为手动
         profile.set_preference('network.proxy.ssl', ip)#这里设置代理ip
@@ -31,8 +35,8 @@ def setHttpsProxy(ip,port,useragent = "",is_phone = False):#参数  ip地址   �
     except:
         return False
 
-#页面停留
-def pageReader(times = 10, stoptimes = 3):
+
+def pageReader(times = 10, stoptimes = 3):#页面停留
     global driver#全局变量
     time.sleep(stoptimes*60)#页面停留时间默认3分钟,因为百度会根据时间判断页面的重要性
     num = 180   #固定值是180根据百度搜多搜索页面高度1879
@@ -46,8 +50,8 @@ def pageReader(times = 10, stoptimes = 3):
         driver.execute_script("window.scrollBy(0,%s)" % num,"") #最后了  开始 跳转  就酱
 
 
-#这个页面 是百度 搜索 列表的阅读 页面   不知带 有用没  先 用用吧
-def baidu_list_page_reader():
+
+def baidu_list_page_reader():#这个页面 是百度 搜索 列表的阅读 页面   不知带 有用没  先 用用吧
     global driver#全局变量
     time.sleep(5) #先休息5秒防止出错
     num = 180   #固定值是180根据百度搜多搜索页面高度1879
@@ -57,17 +61,16 @@ def baidu_list_page_reader():
     #之后开始 随机跳转
     pageReader(10,0.2)
 
-#这个办法主要是 放一些 排除 的网站,然后  其他 的网站   都要 点击
-#delete not click link use javascript on baidu.com list page
-#at last add this to wile_be_start()
+#这个办法主要是 放一些 排除 的网站,然后  其他 的网站   都要 点击  
+#delete not click link use javascript on baidu.com list page at last add this to wile_be_start()
 def noClick():
     with open('no_click.json' , 'r' , encoding="utf8") as f:
         data = json.load(f)
         for x in data['js']:
             driver.execute_script(x,"")
 
-#这个方法主要实现的是跳转到百度下一页 的页面.时间 的话   可以 根据 电脑 适当 的调节
-def baiduNextPage():
+
+def baiduNextPage():#这个方法主要实现的是跳转到百度下一页 的页面.时间 的话   可以 根据 电脑 适当 的调节
     global baiduTitle , driver
     time.sleep(5)#等待页面载入
     assert baiduTitle in driver.title#确定页面是百度搜索页面
@@ -75,18 +78,16 @@ def baiduNextPage():
     driver.execute_script("window.scrollBy(0,document.body.scrollHeight)","")#滚动到最下边.没什么卵用
     driver.find_element_by_link_text("下一页>").click()
 
-
 #下边是两套规则
-#规则1  除了过滤器其他的 都点
-def type1():
+def type1():#规则1  除了过滤器其他的随机点
     time.sleep(5) #时间停留5秒 增加系统容错率
     i = 0
-    while i<=baidupagenumber1:#这是翻页的循环
+    while i<=read_config.value("baidupagenumber1"):#这是翻页的循环
         i = i + 1
         time.sleep(3)
         noClick()#过滤掉不要的链接
         content_list_num = driver.find_elements_by_tag_name("h3")
-        print("打印出  总共  有几个元素:%s"%len(content_list_num))
+        #print("打印出  总共  有几个元素:%s"%len(content_list_num))
         for x in content_list_num:
             if suiji():
                 #print("随机数打印到了")
@@ -99,18 +100,15 @@ def type1():
                     driver.switch_to_window(driver.window_handles[0])
                     time.sleep(5)
                 except:
-                    print("错误一次")
+                    pass
             else:
-                print("随机数没有打印到")
+                pass
         baiduNextPage()
-        print("结束.开始第二页")
 
-
-#规则2  点击特定的页面   其他的不点
-def type2(link):
+def type2(link):#规则2  点击特定的页面   其他的不点
     time.sleep(5) #时间停留5秒 增加系统容错率
     i = 0
-    while i<=baidupagenumber2:#这是翻页的循环
+    while i<=read_config.value("baidupagenumber2"):#这是翻页的循环
         i= i + 1
         try:
             driver.find_element_by_partial_link_text(link).click()
@@ -119,37 +117,45 @@ def type2(link):
             pageReader()
             driver.close()
             driver.switch_to_window(driver.window_handles[0])
-            time.sleep(5)
-            print("找到链接,并且浏览成功")    
+            time.sleep(5)    
         except:
-            print("没找到")
+            pass
         baiduNextPage()
-    print("结束.离开")
 
-#提供随机数  直接返回布尔值  默认为70%
-def suiji(sum = 7):
+
+def suiji(sum = 7):#提供随机数  直接返回布尔值  默认为70%
     if int(random.uniform(0,10))<sum:
         return True
     else:
         return False
 
-#百度搜索开始搜索方法
-def baidustart(kew):
-    global driver , kewword , baiduTitle #引入全局变量
-    setHttpsProxy(bc_ip , bc_proxy)#设置浏览器的代理
-    kewword = kew
+def baidustart(kew):#百度搜索开始搜索方法
+    global driver  , baiduTitle #引入全局变量
+    baiduTitle = keyword + "_百度搜索"#设置title
     time.sleep(5)
-    driver.get("https://www.baidu.com/s?wd="+kewword)#开始搜索关键字
-    driver.maximize_window()#浏览器最大化(这个 可选)
+    driver.get("https://www.baidu.com/s?wd="+kew)#开始搜索关键字
     assert baiduTitle in driver.title#确定页面是百度搜索页面
 
-#这是页面载入的时候 开始 初始化 变量 的方法
-def program_load():
+def man(ip , port , keyword , types , useragent , is_phone = False):#主要控制办法,接收参数开始执行一次搜索
+    global baiduTitle
+    #接收变量开始设置firfox的配置文件
+    if ip != "" and port != "" and kewword !="" and types !="" and useragent !="":#判断接收的值的是否为空值
+        pass
+    else:
+        pass
+    setHttpsProxy(ip , port , useragent)#设置代理
+    baidustart(keyword)#开始搜索
+    if types == "1":
+        type1()
+    else:
+        type2()
+    driver.quit()#释放内存
+
+
+
+def main():
     pass
 
-#主要控制办法,接收参数开始执行一次搜索
-def main(ip , port , kewword , type):
-    pass
 
 if __name__ == '__main__':
     sys.exit(int(main() or 0))
