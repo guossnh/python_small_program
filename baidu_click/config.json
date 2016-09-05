@@ -1,10 +1,11 @@
 {
     "name": "this is baidu_click program's config file",
     "browser_useragent_file": "/browser.json",
-    "firfox_config_file": "",
     "get_ip_link": "http://qsrdk.daili666api.com/ip/?tid=556258590050521&num=1&category=2&protocol=https&foreign=none&filter=on",
     "firfox_default_file": "C:\\Users\\Administrator\\AppData\\Roaming\\Mozilla\\Firefox\\Profiles\\witrfxpv.default",
     "baidupagenumber1": 5,
+    "_baidupagenumber1": "这是百度搜索页面类型1的翻页次数",
     "baidupagenumber2": 5,
+    "_baidupagenumber2": "这是百度搜索页面类型2的翻页次数",
     "": ""
 }

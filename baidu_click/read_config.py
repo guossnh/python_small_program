@@ -10,9 +10,17 @@ def value(key):
 #返回json对象需要什么点什么
 def main():
     global config , config_var
-    with open(config,'r', encoding=None) as f:
+    with open(config,'r', encoding="utf8") as f:
         config_var = json.load(f)
     return config_var
+
+def r_no_click():#这个是读取不点击链接的json文件,比较单一放这里试一下
+    with open('no_click.json' , 'r' , encoding="utf8") as f:
+        data = json.load(f)
+        return data['js']
+        #for x in data['js']:
+        #    driver.execute_script(x,"")
+
 
 if __name__ == '__main__':
     sys.exit(int(main() or 0))

@@ -61,14 +61,10 @@ def baidu_list_page_reader():#这个页面 是百度 搜索 列表的阅读 页�
     #之后开始 随机跳转
     pageReader(10,0.2)
 
-#这个办法主要是 放一些 排除 的网站,然后  其他 的网站   都要 点击  
-#delete not click link use javascript on baidu.com list page at last add this to wile_be_start()
-def noClick():
-    with open('no_click.json' , 'r' , encoding="utf8") as f:
-        data = json.load(f)
-        for x in data['js']:
-            driver.execute_script(x,"")
 
+def noClick():#这个办法主要是 放一些 排除 的网站,然后  其他 的网站   都要 点击
+        for x in read_config.r_no_click():
+            driver.execute_script(x,"")
 
 def baiduNextPage():#这个方法主要实现的是跳转到百度下一页 的页面.时间 的话   可以 根据 电脑 适当 的调节
     global baiduTitle , driver
@@ -81,16 +77,12 @@ def baiduNextPage():#这个方法主要实现的是跳转到百度下一页 的�
 #下边是两套规则
 def type1():#规则1  除了过滤器其他的随机点
     time.sleep(5) #时间停留5秒 增加系统容错率
-    i = 0
-    while i<=read_config.value("baidupagenumber1"):#这是翻页的循环
-        i = i + 1
+    for x in range(read_config.value("baidupagenumber1"))
         time.sleep(3)
         noClick()#过滤掉不要的链接
         content_list_num = driver.find_elements_by_tag_name("h3")
-        #print("打印出  总共  有几个元素:%s"%len(content_list_num))
         for x in content_list_num:
             if suiji():
-                #print("随机数打印到了")
                 try:
                     x.find_element_by_tag_name("a").click()
                     time.sleep(5)
@@ -107,9 +99,7 @@ def type1():#规则1  除了过滤器其他的随机点
 
 def type2(link):#规则2  点击特定的页面   其他的不点
     time.sleep(5) #时间停留5秒 增加系统容错率
-    i = 0
-    while i<=read_config.value("baidupagenumber2"):#这是翻页的循环
-        i= i + 1
+    for x in range(read_config.value("baidupagenumber2")):#这是翻页页数在配置文件设置
         try:
             driver.find_element_by_partial_link_text(link).click()
             time.sleep(5)
@@ -117,7 +107,7 @@ def type2(link):#规则2  点击特定的页面   其他的不点
             pageReader()
             driver.close()
             driver.switch_to_window(driver.window_handles[0])
-            time.sleep(5)    
+            time.sleep(5)
         except:
             pass
         baiduNextPage()
@@ -136,16 +126,16 @@ def baidustart(kew):#百度搜索开始搜索方法
     driver.get("https://www.baidu.com/s?wd="+kew)#开始搜索关键字
     assert baiduTitle in driver.title#确定页面是百度搜索页面
 
-def man(ip , port , keyword , types , useragent , is_phone = False):#主要控制办法,接收参数开始执行一次搜索
+def man(dir):#主要控制办法,接收参数开始执行一次搜索
     global baiduTitle
     #接收变量开始设置firfox的配置文件
     if ip != "" and port != "" and kewword !="" and types !="" and useragent !="":#判断接收的值的是否为空值
         pass
     else:
         pass
-    setHttpsProxy(ip , port , useragent)#设置代理
-    baidustart(keyword)#开始搜索
-    if types == "1":
+    setHttpsProxy(dir['ip'] , dir['port'] , dir['useragent'])#设置代理
+    baidustart(dir['keyword'])#开始搜索
+    if dir['serch_type'] == "1":
         type1()
     else:
         type2()
