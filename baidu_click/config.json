@@ -7,5 +7,6 @@
     "_baidupagenumber1": "这是百度搜索页面类型1的翻页次数",
     "baidupagenumber2": 5,
     "_baidupagenumber2": "这是百度搜索页面类型2的翻页次数",
-    "": ""
+    "page_stop_time": 1,
+    "_page_stop_time": "这是页面停留的时间系数,换成60的话页面停留时间就以分钟来计数"
 }

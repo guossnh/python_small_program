@@ -4,7 +4,7 @@ from selenium import webdriver
 from urllib import request
 from random import choice
 import time , csv , json , time
-import get_proxy , time ,read_config
+import get_proxy , time ,read_config , random
 #下边 是变量
 # Mozilla/5.0 (Windows NT 6.1; WOW64; rv:45.0) Gecko/20100101 Firefox/45.0 
 profileDir = "C:\\Users\\Administrator\\AppData\\Roaming\\Mozilla\\Firefox\\Profiles\\witrfxpv.default"
@@ -75,15 +75,13 @@ print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) )
 # print(time.sleep(3))
 # print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
 
-inf = ""
+num = 180
+num = abs(num + int(random.sample([180,-180],1)[0]))
 
-def set_inf():
-    global inf 
-    inf = {'key1' : 'value1' , 'key2' : 'value2'}
-    return inf
-
-def get_inf(dir):
-    print(dir['key1'])
+#print(num)
 
 
-get_inf(set_inf())
+print(type(read_config.value("page_stop_time")))
+
+time.sleep(0.2)
+
