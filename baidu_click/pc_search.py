@@ -16,7 +16,7 @@ profile = ""#设置浏览器基本设置
 baiduTitle = ""#设置百度标题,用于判断是否页面已经载入
 
 #这是初始化浏览器的办法
-def setHttpsProxy(ip,port,useragent = "",is_phone = False):#参数  ip地址   端口  这是useragent
+def setHttpsProxy(ip,port,useragent = ""):#参数  ip地址   端口  这是useragent
     global driver , profile#全局变量
     profile = webdriver.FirefoxProfile(read_config.value("firfox_default_file"))#使用本地的firfox的配置文件
     #profile.set_preference('network.proxy.type', 1)#设置浏览器上完方式为手动
@@ -27,10 +27,7 @@ def setHttpsProxy(ip,port,useragent = "",is_phone = False):#参数  ip地址   �
         profile.set_preference('general.useragent.override', useragent)#这是里设置useragent
     profile.update_preferences()
     driver = webdriver.Firefox(profile)#设置浏览器
-    if is_phone:
-        driver.set_window_size(450 , 800)#这是设置浏览器窗口的大小的地方
-    else:
-        driver.maximize_window()#浏览器最大化(这个可选)
+    driver.maximize_window()#浏览器最大化(这个可选)
 
 
 def pageReader(times = 10, stoptimes = 3):#页面停留
@@ -66,6 +63,7 @@ def baiduNextPage():#这个方法主要实现的是跳转到百度下一页 的�
     driver.implicitly_wait(10)#隐试等待
     driver.execute_script("window.scrollBy(0,document.body.scrollHeight)","")#滚动到最下边.没什么卵用
     driver.find_element_by_link_text("下一页>").click()
+
 
 #下边是两套规则
 def type1():#规则1  除了过滤器其他的随机点
@@ -135,7 +133,7 @@ def man(dir):#主要控制办法,接收参数开始执行一次搜索
 
 
 
-def main():#用于测试种种    
+def main():#用于测试种种
     search_inf = {'ip':'','port':'','useragent':'','search_type':True,'click_link':'www.51yam.com','keyword':'富硒六味地黄丸'}
     request = man(search_inf)
     print(request)

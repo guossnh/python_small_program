@@ -19,6 +19,7 @@
     /get_proxy.json      获取代理地址的模块
     /no_click.json       不点击的列表
     /try.py              这是测试模块是否可用的文件,主要测试使用.
-    /search.py           这是搜索模块,接收关键词和ip端口信息然后 执行 一次 搜索
+    /pc_search.py        这是电脑搜索模块,接收关键词和ip端口信息然后 执行 一次 搜索
+    /ph_search.py        这是手机搜索模块,接收关键词和ip端口信息然后 执行 一次 搜索
     /old_save/old.py     这是1.0的主模块,现在已经弃用.
     /old_save/bc.py      这是第2.0的主模块现在已经修改的不能使用
