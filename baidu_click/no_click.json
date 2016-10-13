@@ -1,5 +1,8 @@
-{"js":["$('a:contains(315jiage.cn)').parent().parent().remove()",
-       "$('h3:contains(九制黄精饮什么牌子的是真药?另外一盒多少钱?_百度知道)').parent().remove()",
-       "$('h3:contains(请问阿胶黄精丸是不是吃死过人啊?_百度知道)').parent().remove()",
-       "$('h3:contains(阿胶黄精丸价格多少钱一瓶?是不是真药?的评论_第2页)').parent().remove()"
-       ]}
+{
+    "js": ["$('a:contains(315jiage.cn)').parent().parent().remove()",
+        "$('h3:contains(九制黄精饮什么牌子的是真药?另外一盒多少钱?_百度知道)').parent().remove()",
+        "$('h3:contains(请问阿胶黄精丸是不是吃死过人啊?_百度知道)').parent().remove()",
+        "$('h3:contains(阿胶黄精丸价格多少钱一瓶?是不是真药?的评论_第2页)').parent().remove()"
+    ],
+    "other": [""]
+}

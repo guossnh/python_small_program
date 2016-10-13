@@ -18,6 +18,7 @@ def text1():
     assert "富硒六味地黄丸_百度搜索" in driver.title#确定页面是百度搜索页面
     driver.maximize_window()
     try:
+        print(type(driver.find_element_by_partial_link_text("富硒六味地黄丸")))
         driver.find_element_by_partial_link_text("富硒六味地黄丸").click()
         print("find it ")
     except:
@@ -74,14 +75,29 @@ print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()) )
 # print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
 # print(time.sleep(3))
 # print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
+def text5():
+    global profileDir
+    profile = webdriver.FirefoxProfile(profileDir)
+    driver = webdriver.Firefox(profile)
+    driver.get("https://m.baidu.com/s?word=富硒六味地黄丸")
+    time.sleep(3)
+    driver.find_element_by_partial_link_text("富硒六味地黄丸").remove()
+    print("good")
+    time.sleep(5)
 
-num = 180
-num = abs(num + int(random.sample([180,-180],1)[0]))
-
-#print(num)
-
-
-print(type(read_config.value("page_stop_time")))
-
-time.sleep(0.2)
-
+text5()
+#
+#
+#
+#
+#
+#
+#这个网站 看一下  上次 写到 这里 了  http://www.css88.com/doc/zeptojs_api/    百度m.baidu.com没有使用jquery 使用的是 这个  所以之前 的过滤器 不能使用了用这个想一下 百度 的移动端 应该 怎么写 选择器
+#
+#
+#
+#
+#
+#
+#
+#
