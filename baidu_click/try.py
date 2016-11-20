@@ -81,7 +81,10 @@ def text5():
     driver = webdriver.Firefox(profile)
     driver.get("https://m.baidu.com/s?word=富硒六味地黄丸")
     time.sleep(3)
-    driver.find_element_by_partial_link_text("富硒六味地黄丸").remove()
+    #driver.find_element_by_partial_link_text("富硒六味地黄丸").remove()
+
+    driver.execute_script("","")
+
     print("good")
     time.sleep(5)
 
