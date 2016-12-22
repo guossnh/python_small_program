@@ -16,12 +16,16 @@ from collections import Iterable
 #常量 
 #洗浴推拿 编号 071400  
 #诊所  编号 090300
+#090700	医疗保健服务	动物医疗场所	动物医疗场所
+#090701	医疗保健服务	动物医疗场所	宠物诊所
+#090702	医疗保健服务	动物医疗场所	兽医站
+
 
 #319b295774592eb15f74feb5a116f5ba,a173ef77f76f2573a2f1e1a159af29b5,49986bc0637849b6d083d0329ba98ab8,b596394af04fa0bb6c76b47fbed45295
-gaode_key = "49986bc0637849b6d083d0329ba98ab8"
+gaode_key = "acea7c613e9f98becf064f8553cc0e2c"
 keywords = ""
 gaode_link = ""
-goade_link_other_kew = "&offset=50&citylimit=true&types=071400"
+goade_link_other_kew = "&offset=50&citylimit=true&types=090702"
 city = ""
 
 #打开数据库
@@ -31,7 +35,7 @@ now_link = ""
 
 pagenumber = 1 #这是页面数的标记
 
-city_num = 1 #这是变量选择城市的标记
+city_num = 3152 #这是变量选择城市的标记
 
 this_is_all_num = 0#用于判断次数,判断一个key的话  每天使用次数的话 必须小于1000次
 
@@ -86,7 +90,7 @@ def do_json():
 
 def dbadd(gdid,name,gdtype,typecode,biz_type,address,tel,distance,biz_ext,pname,cityname,adname):
     try:
-        conn.execute("insert into gaode (gdid,name,gdtype,typecode,biz_type,address,tel,distance,biz_ext,pname,cityname,adname) values ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s')" %(gdid,name,gdtype,typecode,biz_type,address,tel,distance,biz_ext,pname,cityname,adname))
+        conn.execute("insert into pet (gdid,name,gdtype,typecode,biz_type,address,tel,distance,biz_ext,pname,cityname,adname) values ('%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s')" %(gdid,name,gdtype,typecode,biz_type,address,tel,distance,biz_ext,pname,cityname,adname))
         conn.commit()
     except:
         pass
@@ -95,7 +99,7 @@ def dbadd(gdid,name,gdtype,typecode,biz_type,address,tel,distance,biz_ext,pname,
 def main():
     global this_is_all_num , pagenumber , city_num
     get_city_number(city_num)
-    while (this_is_all_num < 990):
+    while (this_is_all_num < 999):
         getlink()
         this_is_all_num = this_is_all_num + 1 #控制计数保证总数量小于1000
         do_json()#执行方法
