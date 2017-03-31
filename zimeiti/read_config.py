@@ -1,5 +1,5 @@
 #-*- coding : utf-8 -*-
-#这是读取 配置 文件 然后 返回 字典数据
+#这是读取 配置 文件 然后 返回 字典数据  修改一下
 import json ,sys 
 config = 'config.json'
 config_var = ''
