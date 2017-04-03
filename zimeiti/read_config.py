@@ -26,7 +26,7 @@ def get_usergent():
     #这是一个随机获取浏览器UserAgent的方法,调用之后返回一个UserAgent的字符串
     with open('browser.json', 'r', encoding="utf8") as f:
         date = json.load(f)
-        print(list(date['phone_browser'].values())[int(random.uniform(0, len(date['phone_browser'])))])
+    return list(date['phone_browser'].values())[int(random.uniform(0, len(date['phone_browser'])))]
 
 if __name__ == '__main__':
     sys.exit(int(main() or 0))
