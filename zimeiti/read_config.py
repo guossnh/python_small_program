@@ -1,6 +1,6 @@
 #-*- coding : utf-8 -*-
 #这是读取 配置 文件 然后 返回 字典数据  修改一下
-import json ,sys ,random
+import json ,sys ,random , urllib.request
 config = 'config.json'
 config_var = ''
 #传入key返回value   这个方法 好像 很没用啊
@@ -12,8 +12,8 @@ def main():
     global config , config_var
     with open(config,'r', encoding="utf8") as f:
         config_var = json.load(f)
-    #return config_var#为了测试 先注释
-    get_usergent()
+    return config_var#为了测试 先注释
+    
 
 def r_no_click():#这个是读取不点击链接的json文件,比较单一放这里试一下
     with open('no_click.json' , 'r' , encoding="utf8") as f:
@@ -26,7 +26,14 @@ def get_usergent():
     #这是一个随机获取浏览器UserAgent的方法,调用之后返回一个UserAgent的字符串
     with open('browser.json', 'r', encoding="utf8") as f:
         date = json.load(f)
-    return list(date['phone_browser'].values())[int(random.uniform(0, len(date['phone_browser'])))]
+    return list(date['phone_browser'].values())[int(random.uniform(0, len(date['phone_browser'])))]#这里是 随机返回一条浏览器useragent的数据
+
+def get_link():
+    date = ""
+    with urllib.request.urlopen(value('zimeiti_page')) as f:
+        date  = f.read().decode()
+    return date.splitlines()
+
 
 if __name__ == '__main__':
     sys.exit(int(main() or 0))

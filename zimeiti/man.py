@@ -16,31 +16,47 @@ baiduTitle = ""#设置百度标题,用于判断是否页面已经载入
 def setHttpsProxy(ip,port,useragent = ""):#参数  ip地址   端口  这是useragent
     global driver , profile#全局变量
     profile = webdriver.FirefoxProfile(read_config.value("firfox_default_file"))#使用本地的firfox的配置文件
-    #profile.set_preference('network.proxy.type', 1)#设置浏览器上完方式为手动
-    if ip !='':
-        profile.set_preference('network.proxy.ssl', ip)#这里设置代理ip
-        profile.set_preference('network.proxy.ssl_port', port)#这是设置代理的端口
-    if useragent != "" :#判断usergaent是否为空
-        profile.set_preference('general.useragent.override', useragent)#这是里设置useragent
+    profile.set_preference('network.proxy.type', 1)#设置浏览器上完方式为手动
+    profile.set_preference('network.proxy.ssl', ip)#这里设置代理ip
+    profile.set_preference('network.proxy.ssl_port', int(port))#这是设置代理的端口
+    profile.set_preference('general.useragent.override', useragent)#这是里设置useragent
     profile.update_preferences()
     driver = webdriver.Firefox(profile)#设置浏览器
-    driver.maximize_window()#浏览器最大化(这个可选)
+    driver.set_window_size(400,700)#设置浏览器 打开 类似 手机大小 
 
 
-def pageReader(times = 10, stoptimes = 3):#页面停留
+def pageReader(link, stoptimes = 3):#页面停留
     global driver#全局变量
-    time.sleep(stoptimes*read_config.value("page_stop_time"))#页面停留时间默认3分钟,因为百度会根据时间判断页面的重要性
-    num = 180   #固定值是180根据百度搜多搜索页面高度1879
-    for x in range(1,int(random.uniform(4,times))): #循环  设置循环表示要跳转几次. 上线 的话 可以多添加 几次
+    driver.get(link)
+    time.sleep(stoptimes*read_config.value("page_stop_time"))#页面停留时间默认3秒钟,因为百度会根据时间判断页面的重要性
+    num = 150   #瞎JB写的  :)
+    for x in range(1,int(random.uniform(read_config.value("page_min_time"),read_config.value("page_max_time")))): #循环  设置循环表示要跳转几次. 上线 的话 可以多添加 几次
         time.sleep(3)   #每次循环之后添加停留时间增加容错率
-        num = abs(num + int(random.sample([180,-180],1)[0]))
+        num = abs(num + int(random.sample([150,-150],1)[0]))
         driver.execute_script("window.scrollBy(0,%s)" % num,"") #最后了  开始 跳转  就酱
+    driver.close()
+
+def read_page_man():
+    #获取连接数组
+    global driver#全局变量
+    for link in (read_config.get_link()):
+        try:
+            ipoer = get_proxy.get().split(':')
+            setHttpsProxy(ipoer[0],ipoer[1],read_config.get_usergent())
+            pageReader(link)
+        except:
+            driver.close()
 
 
 
 def main():
     '''主函数'''
-    proxy = get_proxy.get()
+    #read_page_man()
+    while 1:
+        read_page_man()
+        print(1)
+
+
 
 
 

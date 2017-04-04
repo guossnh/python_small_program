@@ -2,7 +2,10 @@
     "name": "this is baidu_click program's config file",
     "browser_useragent_file": "/browser.json",
     "get_ip_link": "http://qsrdk.daili666api.com/ip/?tid=555525479143570&num=1&category=2&protocol=https&foreign=none&filter=on",
-    "firfox_default_file": "C:\\Users\\Administrator\\AppData\\Roaming\\Mozilla\\Firefox\\Profiles\\witrfxpv.default",
+    "firfox_default_file": "C:\\Users\\Administrator\\AppData\\Roaming\\Mozilla\\Firefox\\Profiles\\749cy4b3.default",
     "page_stop_time": 1,
-    "_page_stop_time": "这是页面停留的时间系数,换成60的话页面停留时间就以分钟来计数"
+    "_page_stop_time": "这是页面停留的时间系数,换成60的话页面停留时间就以分钟来计数",
+    "page_max_time":7,
+    "page_min_time":15,
+    "zimeiti_page":"http://7d9rf7.com1.z0.glb.clouddn.com/link.txt"
 }

@@ -7,13 +7,6 @@ def get(): #get proxy
     print("wocao")
     with urllib.request.urlopen(read_config.value('get_ip_link')) as f:
         data  = f.read().decode()
-    #if try_proxy(data):
-    #    return data
-    #else:
-    #    time.sleep(3)
-    #    return False
-    #
-    #    get()  #这样调用使用移动的网络容易 出现问题  狗日的移动
     while try_proxy(data):
         get()
     return data
