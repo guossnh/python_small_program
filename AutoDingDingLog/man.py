@@ -9,7 +9,7 @@ dcap = dict(DesiredCapabilities.PHANTOMJS)
 dcap["phantomjs.page.settings.userAgent"] = (
 "Mozilla/5.0 (Linux; Android 5.1.1; Nexus 6 Build/LYZ28E) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.23 Mobile Safari/537.36"
 )
-linkList = {'zhentou':'144074118','manao':'217495048'}
+linkList = {'zhentou':'144074118'}
 dblink = "D:\\git\\python_small_program\\AutoDingDingLog\\"
 #http://shop.m.taobao.com/shop/shop_index.htm?shop_id=217495048       这是玛瑙店铺
 #http://shop.m.taobao.com/shop/shop_index.htm?shop_id=144074118       这是枕头店铺
