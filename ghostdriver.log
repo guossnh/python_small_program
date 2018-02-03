@@ -1,0 +1,24 @@
+[INFO  - 2017-09-12T16:00:47.231Z] GhostDriver - Main - running on port 3188
+[INFO  - 2017-09-12T16:00:48.353Z] Session [8af70e70-97d3-11e7-8f6b-cd9c622c5472] - page.settings - {"XSSAuditingEnabled":false,"javascriptCanCloseWindows":true,"javascriptCanOpenWindows":true,"javascriptEnabled":true,"loadImages":true,"localToRemoteUrlAccessEnabled":false,"userAgent":"Mozilla/5.0 (Linux; Android 5.1.1; Nexus 6 Build/LYZ28E) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.23 Mobile Safari/537.36","webSecurityEnabled":true}
+[INFO  - 2017-09-12T16:00:48.353Z] Session [8af70e70-97d3-11e7-8f6b-cd9c622c5472] - page.customHeaders:  - {}
+[INFO  - 2017-09-12T16:00:48.353Z] Session [8af70e70-97d3-11e7-8f6b-cd9c622c5472] - Session.negotiatedCapabilities - {"browserName":"phantomjs","version":"2.1.1","driverName":"ghostdriver","driverVersion":"1.2.0","platform":"windows-10-32bit","javascriptEnabled":true,"takesScreenshot":true,"handlesAlerts":false,"databaseEnabled":false,"locationContextEnabled":false,"applicationCacheEnabled":false,"browserConnectionEnabled":false,"cssSelectorsEnabled":true,"webStorageEnabled":false,"rotatable":false,"acceptSslCerts":false,"nativeEvents":true,"proxy":{"proxyType":"direct"},"phantomjs.page.settings.userAgent":"Mozilla/5.0 (Linux; Android 5.1.1; Nexus 6 Build/LYZ28E) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/48.0.2564.23 Mobile Safari/537.36"}
+[INFO  - 2017-09-12T16:00:48.353Z] SessionManagerReqHand - _postNewSessionCommand - New Session Created: 8af70e70-97d3-11e7-8f6b-cd9c622c5472
+[ERROR - 2017-09-12T16:00:49.620Z] Session [8af70e70-97d3-11e7-8f6b-cd9c622c5472] - page.onError - msg: ReferenceError: Can't find variable: Promise
+
+  phantomjs://platform/console++.js:263 in error
+[ERROR - 2017-09-12T16:00:49.620Z] Session [8af70e70-97d3-11e7-8f6b-cd9c622c5472] - page.onError - stack:
+  initialize (https://g.alicdn.com/DingTalkWeb/web/3.5.12/assets/app.js:410)
+  n (https://g.alicdn.com/DingTalkWeb/web/3.5.12/assets/app.js:6)
+  (anonymous function) (https://g.alicdn.com/DingTalkWeb/web/3.5.12/assets/app.js:410)
+  t (https://g.alicdn.com/DingTalkWeb/web/3.5.12/assets/app.js:1)
+  (anonymous function) (https://g.alicdn.com/DingTalkWeb/web/3.5.12/assets/app.js:438)
+  t (https://g.alicdn.com/DingTalkWeb/web/3.5.12/assets/app.js:1)
+  (anonymous function) (https://g.alicdn.com/DingTalkWeb/web/3.5.12/assets/app.js:438)
+  t (https://g.alicdn.com/DingTalkWeb/web/3.5.12/assets/app.js:1)
+  (anonymous function) (https://g.alicdn.com/DingTalkWeb/web/3.5.12/assets/app.js:18)
+  t (https://g.alicdn.com/DingTalkWeb/web/3.5.12/assets/app.js:1)
+  (anonymous function) (https://g.alicdn.com/DingTalkWeb/web/3.5.12/assets/app.js:492)
+  t (https://g.alicdn.com/DingTalkWeb/web/3.5.12/assets/app.js:1)
+  (anonymous function) (https://g.alicdn.com/DingTalkWeb/web/3.5.12/assets/app.js:1)
+
+  phantomjs://platform/console++.js:263 in error
