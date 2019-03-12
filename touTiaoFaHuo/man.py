@@ -111,5 +111,6 @@ if __name__=="__main__":#主函数
         readxlsx()
         print("总共统计"+str(len(allNumList))+"条发货信息，检查一下是否正确。不正确的话就不要使用了")
         docsv()
+        print("已经生成批量发货.csv  在你的桌面上边")
     else:
         pass
