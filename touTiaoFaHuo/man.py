@@ -85,7 +85,7 @@ def docsv():#生成鲁班发货文件
         writer = csv.writer(csvfile)
         for value in allNumList:
             writer.writerow([value.get("dingdanhao"),"jd",value.get("yundanhao"),"河南省栾川县城关镇南大街46号"])
-        
+    
 
 if __name__=="__main__":#主函数
     #while True:
