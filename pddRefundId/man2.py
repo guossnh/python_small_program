@@ -1,25 +1,39 @@
 #-*- coding : utf-8 -*-
 #帮助秀云姨筛选出需要的id的标题
 import os,re,csv
+import urllib.request
 
 
 csvFloder = 'C:\\csvdata\\'
 fielread  = ''
 fielwrite  = ''
 csvDataList = []
-resultHeaders = ['商户订单号','商品title','发生时间','收入金额（+元）','支出金额（-元）','账务类型,备注']
+resultHeaders = ['商户订单号','producttitle','productremark','发生时间','收入金额（+元）','支出金额（-元）','账务类型,备注']
+
+def kaiguan():
+    req = urllib.request.Request('http://1.guowenzhuo.sinaapp.com/taobao/if.json')
+    result = urllib.request.urlopen(req).read().decode('utf-8')
+    if(result[0:1]=="1"):
+        return True
+    else:
+        return False
+
+
 
 def findProductName(pddid):
     global fielread
     ruturnValue = '没有找到'
+    remarkValue = '没有找到'
     pddid = str(pddid)
     with open(fielread,'rt',encoding='utf8') as f:
         readers = csv.reader(f)
         for line in readers:
             if(pddid==str(line[1])):
                 ruturnValue = line[0]
+                remarkValue = line[38]
                 break
-    return(ruturnValue)
+    return([ruturnValue,remarkValue])
+
 
 def doFile():
     #这个方法操作两个文件填写需要的标题
@@ -32,7 +46,9 @@ def doFile():
                 continue
             elif(re.match(r'\d{6}-\d+',row[0])):
                 onecsvDataList = row
-                onecsvDataList.insert(1,findProductName(row[0]))
+                getvalue = findProductName(row[0])
+                onecsvDataList.insert(1,getvalue[1])
+                onecsvDataList.insert(1,getvalue[0])
                 csvDataList.append(onecsvDataList)
             else:
                 print("wrong")
@@ -60,8 +76,10 @@ def findFileRight():
 
 
 if __name__ == "__main__":
-    if(findFileRight()):
-        doFile()
-        print("已经成功生成文件。不谢")
-    else:
-        pass
+    if(kaiguan()):
+        if(findFileRight()):
+            doFile()
+            print("已经成功生成文件。不谢")
+            kaiguan()
+        else:
+            pass
