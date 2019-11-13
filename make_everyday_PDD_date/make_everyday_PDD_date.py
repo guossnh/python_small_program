@@ -2,7 +2,7 @@
 #根据桌面的下载数据统计生成需要的文件发送给会计
 
 import pandas as pd
-import time,os,datetime,glob
+import time,os,datetime,glob,sys
 
 desktop_link = "C:\\Users\\Administrator\\Desktop\\"
 
@@ -13,5 +13,11 @@ def get_file_name_list():
     return glob.glob(r''+desktop_link+'*'+now_time+'*.csv')
 
 
+def get_productID_and_productName():
+    date = pd.read_csv(""+sys.path[0]+"\\product_name_id.csv")
+    print(date)
+
 if __name__ == "__main__":
-    get_file_name_list()
+    get_productID_and_productName()
+    
+    
