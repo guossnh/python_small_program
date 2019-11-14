@@ -2,7 +2,7 @@
 #根据桌面的下载数据统计生成需要的文件发送给会计
 
 import pandas as pd
-import time,os,datetime,glob,sys
+import time,os,datetime,glob,sys,csv
 desktop_link = "C:\\Users\\Administrator\\Desktop\\"
 product_list =[]
 product_file_list =[]
@@ -35,9 +35,19 @@ def get_productID_and_productName():
 if __name__ == "__main__":
     result_file = make_all_file()
     all_date = result_file[result_file["售后状态"]=="无售后或售后取消"]
+    all_date["商家备注"] = all_date["商家备注"].str.split(";").str[-1]
     for one_date in get_productID_and_productName():
         all_shell = all_date[(all_date["商品id"]==one_date['id'])]["商家实收金额(元)"].sum()
-        rell_shell = all_date[(all_date["商品id"]==one_date['id'])&(all_date["商家备注"].str.contains("G-WZ"))]["商家实收金额(元)"].sum()
-        print(all_shell)
-        print(rell_shell)
-        
+        rell_shell = all_date[(all_date["商品id"]==one_date['id'])&(all_date["商家备注"].str.contains("G-"))]["商家实收金额(元)"].sum()
+        one_date["all_shell"] = round(all_shell,2)
+        one_date["rell_shell"] = round(rell_shell,2)
+        one_date["make_shell"] = round(all_shell-rell_shell,2)
+        print(one_date)
+    with open(""+desktop_link+"每日数据.csv","w") as csvfile: 
+        writer = csv.writer(csvfile)
+        #先写入columns_name
+        writer.writerow(["产品名字","总销售额","真是销售额","干预销售额","直通车消耗"])
+        #写入多行用writerows
+        for i in product_list:
+            writer.writerow([i["name"],i["all_shell"],i["rell_shell"],i["make_shell"],0])
+
