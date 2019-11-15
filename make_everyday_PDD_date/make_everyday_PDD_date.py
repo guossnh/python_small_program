@@ -38,15 +38,19 @@ if __name__ == "__main__":
     all_date["商家备注"] = all_date["商家备注"].str.split(";").str[-1]
     for one_date in get_productID_and_productName():
         all_shell = all_date[(all_date["商品id"]==one_date['id'])]["商家实收金额(元)"].sum()
-        rell_shell = all_date[(all_date["商品id"]==one_date['id'])&(all_date["商家备注"].str.contains("G-"))]["商家实收金额(元)"].sum()
+        make_shell = all_date[(all_date["商品id"]==one_date['id'])&(all_date["商家备注"].str.contains("G-"))]["商家实收金额(元)"].sum()
         one_date["all_shell"] = round(all_shell,2)
-        one_date["rell_shell"] = round(rell_shell,2)
-        one_date["make_shell"] = round(all_shell-rell_shell,2)
+        one_date["make_shell"] = round(make_shell,2)
+        one_date["rell_shell"] = round(all_shell-make_shell,2)
         print(one_date)
-    with open(""+desktop_link+"每日数据.csv","w") as csvfile: 
+
+    yes_time = datetime.datetime.now() + datetime.timedelta(days=-1)
+    yes_time_nyr = yes_time.strftime('%Y_%m_%d')
+
+    with open(""+desktop_link+yes_time_nyr+"数据.csv","w",newline = '') as csvfile: 
         writer = csv.writer(csvfile)
         #先写入columns_name
-        writer.writerow(["产品名字","总销售额","真是销售额","干预销售额","直通车消耗"])
+        writer.writerow(["产品名字","总销售额","真实销售额","干预销售额","直通车消耗"])
         #写入多行用writerows
         for i in product_list:
             writer.writerow([i["name"],i["all_shell"],i["rell_shell"],i["make_shell"],0])
