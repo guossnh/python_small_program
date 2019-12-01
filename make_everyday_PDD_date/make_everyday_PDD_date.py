@@ -47,8 +47,10 @@ if __name__ == "__main__":
     yes_time = datetime.datetime.now() + datetime.timedelta(days=-1)
     yes_time_nyr = yes_time.strftime('%Y_%m_%d')
 
-    with open(""+desktop_link+yes_time_nyr+"数据.csv","w",newline = '') as csvfile: 
+    with open(""+desktop_link+"郭文卓每日数据.csv","a+",newline = '') as csvfile: 
         writer = csv.writer(csvfile)
+        #写入标题
+        writer.writerow([""+yes_time.strftime('%Y-%m-%d')+"日销售数据如下"])
         #先写入columns_name
         writer.writerow(["产品名字","总销售额","真实销售额","干预销售额","直通车消耗"])
         #写入多行用writerows
