@@ -7,7 +7,7 @@ import  pandas as pd
 desktop_link = "C:\\Users\\Administrator\\Desktop\\"
 path =  "C:\\Users\\Administrator\\OneDrive\\save\\save\\"
 
-#读取的时候判断    乳  子宫 暖宫   皮肤  止痒 痛经  女
+
 
 def readexcle():
     book = xlrd.open_workbook("C:\\Users\\Administrator\\OneDrive\\save\\save\\maideduo\\2019-11-24-2019-12-11已发货查询结果3071.xlsx")
@@ -25,7 +25,6 @@ def readexcle():
                 pass
         
 #写入csv
-
 def do_csv():
     with open("C:\\Users\\Administrator\\OneDrive\\save\\save\\储存健康支取美丽\\ExportOrderList201912131614.csv","rb") as file:
         #re = csv.reader(file)
@@ -78,9 +77,6 @@ def do_csv():
 
 
 
-
-
-
 def findfile():
     file_all = []
     file_csv = []
@@ -91,13 +87,15 @@ def findfile():
             file_csv.append(x)
     return file_csv
 
-
-
-
 def writecsv(name,phone,address):
     with open(""+desktop_link+"result3.csv","a+",newline = '') as csvfile: 
         writer = csv.writer(csvfile)
         writer.writerow([name,phone,address])
 
+#查询重复量
+def findother():
+    data = pd.read_csv("C:\\Users\\Administrator\\Desktop\\all.csv", encoding="gbk")
+    print(data.duplicated(subset = ['phone'],keep="last"))
+    print(data.drop_duplicates(['phone'],keep="last").count())
+    #newdata.to_csv('C:\\Users\\Administrator\\Desktop\\result11.csv')
 
-do_csv()
