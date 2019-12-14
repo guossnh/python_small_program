@@ -27,16 +27,56 @@ def readexcle():
 #写入csv
 
 def do_csv():
-    with open("C:\\Users\\Administrator\\OneDrive\\save\\save\\luoyangwangcaoshengwujishu\\ExportOrderList201912111052.csv","r") as file:
-        re = csv.reader(file)
+    with open("C:\\Users\\Administrator\\OneDrive\\save\\save\\储存健康支取美丽\\ExportOrderList201912131614.csv","rb") as file:
+        #re = csv.reader(file)
+        re = file.readlines()
         content =0
         content2 =0
+        content3 =0
+        content4 =0
+        print(str(re[0],encoding="gbk"))
         for x in re:
-            content2 +=1
-            if ("乳" in x[19] or "宫" in x[19] or "女" in x[19] or "脱皮" in x[19] or "痛经" in x[19]or "洗" in x[19]):
-                content+=1
-        print(content)
-        print(content2)
+            content+=1
+            wocao = ""
+            try:
+                wocao =  str(x,encoding="gbk")
+                content2+=1
+                wocao = wocao.split(",")
+                wocao2 = wocao[19]
+                wocao3 = wocao[23]
+                if ("乳" in wocao2 or "宫" in wocao2 or "女" in wocao2 or "脱皮" in wocao2 or "痛经" in wocao2 or "洗" in wocao2):
+                    content3+=1
+                    #username = wocao[12].replace("\"","")
+                    #userphone = wocao[16].replace("\"","").replace("\'","")
+                    #useradd =wocao[13].replace("\"","")
+                    #writecsv(username,userphone,useradd)
+                elif("V-" in wocao3):
+                    content4+=1
+                    username = wocao[12].replace("\"","")
+                    userphone = wocao[16].replace("\"","").replace("\'","")
+                    useradd =wocao[13].replace("\"","")
+                    writecsv(username,userphone,useradd)
+            except:
+                pass
+
+            #  12  13  16
+
+        print("总共处理了"+str(content)+"条数据")
+        print("以gbk方式处理了"+str(content2)+"条数据")
+        print("选出了"+str(content3)+"条数据")
+        print("选出了"+str(content4)+"条备用数据")
+
+        '''
+        for x in re:
+            try:
+                content2 +=1
+                if ("乳" in x[19] or "宫" in x[19] or "女" in x[19] or "脱皮" in x[19] or "痛经" in x[19]or "洗" in x[19]):
+                    content+=1
+            except:
+                pass
+        '''
+
+
 
 
 
@@ -55,8 +95,8 @@ def findfile():
 
 
 def writecsv(name,phone,address):
-    with open(""+desktop_link+"result.csv","a+",newline = '') as csvfile: 
-        writer = csv.reader(csvfile)
+    with open(""+desktop_link+"result3.csv","a+",newline = '') as csvfile: 
+        writer = csv.writer(csvfile)
         writer.writerow([name,phone,address])
 
 
