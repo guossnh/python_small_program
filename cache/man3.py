@@ -59,4 +59,3 @@ def findother():
     print(data.drop_duplicates(['phone'],keep="last").count())
     #newdata.to_csv('C:\\Users\\Administrator\\Desktop\\result11.csv')
 
-findother()
