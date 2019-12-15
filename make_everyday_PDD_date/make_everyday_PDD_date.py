@@ -39,9 +39,10 @@ if __name__ == "__main__":
     for one_date in get_productID_and_productName():
         all_shell = all_date[(all_date["商品id"]==one_date['id'])]["商家实收金额(元)"].sum()
         make_shell = all_date[(all_date["商品id"]==one_date['id'])&(all_date["商家备注"].str.contains("G-"))]["商家实收金额(元)"].sum()
+        wb_make_shell = all_date[(all_date["商品id"]==one_date['id'])&(all_date["商家备注"].str.contains("V-"))]["商家实收金额(元)"].sum()
         one_date["all_shell"] = round(all_shell,2)
-        one_date["make_shell"] = round(make_shell,2)
-        one_date["rell_shell"] = round(all_shell-make_shell,2)
+        one_date["make_shell"] = round(make_shell+wb_make_shell,2)
+        one_date["rell_shell"] = round(all_shell-(make_shell+wb_make_shell),2)
         print(one_date)
 
     yes_time = datetime.datetime.now() + datetime.timedelta(days=-1)
