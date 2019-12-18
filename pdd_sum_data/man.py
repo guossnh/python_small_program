@@ -13,12 +13,12 @@ os.chdir(Folder_Path)
 file_list = os.listdir()
  
 #读取第一个CSV文件并包含表头
-df = pd.read_csv(Folder_Path +'\\'+ file_list[0],encoding="utf8")   #编码默认UTF-8，若乱码自行更改
- 
+df = pd.read_csv(Folder_Path +'\\'+ file_list[0],encoding="gbk")   #编码默认UTF-8，若乱码自行更改
+
 #将读取的第一个CSV文件写入合并后的文件保存
-df.to_csv(SaveFile_Path+'\\'+ SaveFile_Name,encoding="utf8",index=False)
+df.to_csv(SaveFile_Path+'\\'+ SaveFile_Name,encoding="gbk",index=False)
  
 #循环遍历列表中各个CSV文件名，并追加到合并后的文件
 for i in range(1,len(file_list)):
-    df = pd.read_csv(Folder_Path + '\\'+ file_list[i],encoding="utf8")
-    df.to_csv(SaveFile_Path+'\\'+ SaveFile_Name,encoding="utf8",index=False, header=False, mode='a+')
+    df = pd.read_csv(Folder_Path + '\\'+ file_list[i],encoding="gbk")
+    df.to_csv(SaveFile_Path+'\\'+ SaveFile_Name,encoding="gbk",index=False, header=False, mode='a+')
