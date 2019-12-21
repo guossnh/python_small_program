@@ -10,10 +10,6 @@ path_csv =  "D:\\chache\\tb\\"
 path_xlsx =  "D:\\chache\\pd\\"
 
 
-
-
-
-
 def readexcle(filname):
     book = xlrd.open_workbook(filname)
     booksheet = book.sheet_by_index(0)
@@ -83,7 +79,6 @@ def findfilecsv():
         for x in files:
             print(path_xlsx+x)
             readexcle(path_xlsx+x)
-
 
 def write_nv_csv(name,phone,address):
     with open(""+desktop_link+"nv.csv","a+",newline = '') as csvfile: 
