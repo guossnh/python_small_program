@@ -14,7 +14,7 @@ file_list = os.listdir()
  
 #读取第一个CSV文件并包含表头
 df = pd.read_csv(Folder_Path +'\\'+ file_list[0],encoding="gbk")   #编码默认UTF-8，若乱码自行更改
- 
+
 #将读取的第一个CSV文件写入合并后的文件保存
 df.to_csv(SaveFile_Path+'\\'+ SaveFile_Name,encoding="gbk",index=False)
  
