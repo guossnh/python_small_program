@@ -15,18 +15,26 @@ def readexcle():
     rows=booksheet.get_rows()
     wocao = 0
     for row in rows:
+        print(row[16].value)
         if("乳" in row[7].value or "宫" in row[7].value or "女" in row[7].value or "脱皮" in row[7].value or "痛经" in row[7].value):
             try:
-                writecsv(row[4].value,row[5].value,row[6].value)
+                #writecsv(row[4].value,row[5].value,row[6].value)
                 wocao+=1
             except:
                 pass
             else:
                 pass
+        elif("V-" in row[16].value or "v-" in row[16].value):
+            try:
+                writecsv(row[4].value,row[5].value,row[6].value)
+                wocao+=1
+            except:
+                pass
+
         
 #写入csv
 def do_csv():
-    with open("C:\\Users\\Administrator\\OneDrive\\save\\save\\储存健康支取美丽\\ExportOrderList201912131614.csv","rb") as file:
+    with open("C:\\Users\\Administrator\\OneDrive\\save\\save\\枕头\\ExportOrderList201912101536.csv","rb") as file:
         #re = csv.reader(file)
         re = file.readlines()
         content =0
@@ -75,8 +83,6 @@ def do_csv():
                 pass
         '''
 
-
-
 def findfile():
     file_all = []
     file_csv = []
@@ -88,14 +94,15 @@ def findfile():
     return file_csv
 
 def writecsv(name,phone,address):
-    with open(""+desktop_link+"result3.csv","a+",newline = '') as csvfile: 
+    with open(""+desktop_link+"result5.csv","a+",newline = '') as csvfile: 
         writer = csv.writer(csvfile)
         writer.writerow([name,phone,address])
 
 #查询重复量
 def findother():
-    data = pd.read_csv("C:\\Users\\Administrator\\Desktop\\all.csv", encoding="gbk")
+    data = pd.read_csv("C:\\Users\\Administrator\\Desktop\\all.csv", encoding="utf8")
     print(data.duplicated(subset = ['phone'],keep="last"))
-    print(data.drop_duplicates(['phone'],keep="last").count())
-    #newdata.to_csv('C:\\Users\\Administrator\\Desktop\\result11.csv')
+    newdata = data.drop_duplicates(['phone'],keep="last")
+    newdata.to_csv('C:\\Users\\Administrator\\Desktop\\result11.csv')
 
+findother()
