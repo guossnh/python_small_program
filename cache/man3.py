@@ -10,10 +10,6 @@ path_csv =  "D:\\chache\\tb\\"
 path_xlsx =  "D:\\chache\\pd\\"
 
 
-
-
-
-
 def readexcle(filname):
     book = xlrd.open_workbook(filname)
     booksheet = book.sheet_by_index(0)
