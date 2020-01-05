@@ -47,14 +47,15 @@ if __name__ == "__main__":
 
     yes_time = datetime.datetime.now() + datetime.timedelta(days=-1)
     yes_time_nyr = yes_time.strftime('%Y_%m_%d')
+    yes_time = yes_time.strftime('%Y-%m-%d')
 
     with open(""+desktop_link+"郭文卓每日数据.csv","a+",newline = '') as csvfile: 
         writer = csv.writer(csvfile)
         #写入标题
-        writer.writerow([""+yes_time.strftime('%Y-%m-%d')+"日销售数据如下"])
+        #writer.writerow([""+yes_time.strftime('%Y-%m-%d')+"日销售数据如下"])
         #先写入columns_name
-        writer.writerow(["产品名字","总销售额","真实销售额","干预销售额","直通车消耗"])
+        #writer.writerow(["产品名字","总销售额","真实销售额","干预销售额","直通车消耗"])
         #写入多行用writerows
         for i in product_list:
-            writer.writerow([i["name"],i["all_shell"],i["rell_shell"],i["make_shell"],0])
+            writer.writerow([yes_time,"郭文卓",i["name"].split("店")[0],i["name"].split("店")[1],i["all_shell"],i["make_shell"],0,i["rell_shell"],i["rell_shell"]])
 
