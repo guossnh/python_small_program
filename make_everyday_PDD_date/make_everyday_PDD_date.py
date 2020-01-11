@@ -2,7 +2,7 @@
 #根据桌面的下载数据统计生成需要的文件发送给会计
 
 import pandas as pd
-import time,os,datetime,glob,sys,csv
+import time,os,datetime,glob,sys,csv,xlrd
 desktop_link = "C:\\Users\\Administrator\\Desktop\\"
 product_list =[]
 product_file_list =[]
@@ -30,9 +30,29 @@ def get_productID_and_productName():
         product_list.append({"name":row[0],"id":row[1],"all_shell":0,"rell_shell":0,"make_shell":0,"money_car":0})
     return product_list
 
+#直通车花费统计直接通过ID找到花费金额
+def get_money_car(productID):
+    car_money_file_list=[]
+    car_money_pd =[]
+    yes_time = datetime.datetime.now() + datetime.timedelta(days=-1)
+    yes_time = yes_time.strftime('%Y%m%d')
+    try:
+        car_money_file_list = glob.glob(r''+desktop_link+'搜索推广_账户_分级详情_计划_'+yes_time+'*.xls')
+        for x in car_money_file_list:
+            car_money_pd.append(pd.read_excel(x))
+        resultpd = pd.concat(car_money_pd)
+        #print(resultpd['花费(元)'])
+        one_resultpd = resultpd[(resultpd['推广计划'].str.find(productID, start=0, end=None)>=0)]
+        if(len(one_resultpd)):
+            return one_resultpd["花费(元)"].values[0]
+        else:
+            return 0
+    except:
+        return 0
 
 
-if __name__ == "__main__":
+
+def writer_file():
     result_file = make_all_file()
     all_date = result_file[result_file["售后状态"]=="无售后或售后取消"]
     all_date["商家备注"] = all_date["商家备注"].str.split(";").str[-1]
@@ -43,19 +63,17 @@ if __name__ == "__main__":
         one_date["all_shell"] = round(all_shell,2)
         one_date["make_shell"] = round(make_shell+wb_make_shell,2)
         one_date["rell_shell"] = round(all_shell-(make_shell+wb_make_shell),2)
+        one_date["money_car"] = get_money_car(str(one_date['id']))
         print(one_date)
 
     yes_time = datetime.datetime.now() + datetime.timedelta(days=-1)
-    yes_time_nyr = yes_time.strftime('%Y_%m_%d')
+    #yes_time_nyr = yes_time.strftime('%Y_%m_%d')
     yes_time = yes_time.strftime('%Y-%m-%d')
 
     with open(""+desktop_link+"郭文卓每日数据.csv","a+",newline = '') as csvfile: 
         writer = csv.writer(csvfile)
-        #写入标题
-        #writer.writerow([""+yes_time.strftime('%Y-%m-%d')+"日销售数据如下"])
-        #先写入columns_name
-        #writer.writerow(["产品名字","总销售额","真实销售额","干预销售额","直通车消耗"])
-        #写入多行用writerows
         for i in product_list:
-            writer.writerow([yes_time,"郭文卓",i["name"].split("店")[0],i["name"].split("店")[1],i["all_shell"],i["make_shell"],0,i["rell_shell"],i["rell_shell"]])
-
+            writer.writerow([yes_time,"郭文卓",i["name"].split("店")[0],i["name"].split("店")[1],i["all_shell"],i["make_shell"],i["money_car"],i["rell_shell"]-(i["money_car"])*2,i["rell_shell"]])
+            
+if __name__ == "__main__":
+    writer_file()

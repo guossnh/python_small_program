@@ -1,27 +1,27 @@
-#-*- coding : utf-8 -*-
-import pygame
+from multiprocessing import Process
+from os import getpid
+from random import randint
+from time import time, sleep
+
+
+def download_task(filename):
+    print('启动下载进程，进程号[%d].' % getpid())
+    print('开始下载%s...' % filename)
+    time_to_download = randint(5, 10)
+    sleep(time_to_download)
+    print('%s下载完成! 耗费了%d秒' % (filename, time_to_download))
 
 
 def main():
-    # 初始化导入的pygame中的模块
-    pygame.init()
-    # 初始化用于显示的窗口并设置窗口尺寸
-    screen = pygame.display.set_mode((800, 600))
-    # 设置当前窗口的标题
-    pygame.display.set_caption('大球吃小球')
-    # 设置窗口的背景色(颜色是由红绿蓝三原色构成的元组)
-    screen.fill((242, 242, 242))
-    # 绘制一个圆(参数分别是: 屏幕, 颜色, 圆心位置, 半径, 0表示填充圆)
-    pygame.draw.circle(screen, (255, 0, 0,), (100, 100), 30, 0)
-    # 刷新当前窗口(渲染窗口将绘制的图像呈现出来)
-    pygame.display.flip()
-    running = True
-    # 开启一个事件循环处理发生的事件
-    while running:
-        # 从消息队列中获取事件并对事件进行处理
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
+    start = time()
+    p1 = Process(target=download_task, args=('Python从入门到住院.pdf', ))
+    p1.start()
+    p2 = Process(target=download_task, args=('Peking Hot.avi', ))
+    p2.start()
+    p1.join()
+    p2.join()
+    end = time()
+    print('总共耗费了%.2f秒.' % (end - start))
 
 
 if __name__ == '__main__':
