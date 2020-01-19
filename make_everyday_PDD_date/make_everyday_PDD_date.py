@@ -73,7 +73,7 @@ def writer_file():
     with open(""+desktop_link+"郭文卓每日数据.csv","a+",newline = '') as csvfile: 
         writer = csv.writer(csvfile)
         for i in product_list:
-            writer.writerow([yes_time,"郭文卓",i["name"].split("店")[0],i["name"].split("店")[1],i["all_shell"],i["make_shell"],i["money_car"],i["rell_shell"]-(i["money_car"])*2,i["rell_shell"]])
+            writer.writerow([yes_time,"郭文卓",i["name"].split("店")[0],i["name"].split("店")[1],i["all_shell"],i["make_shell"],i["money_car"],round(i["rell_shell"]-(i["money_car"])*2,2),i["rell_shell"]])
             
 if __name__ == "__main__":
     writer_file()
