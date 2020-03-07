@@ -51,7 +51,6 @@ def get_money_car(productID):
         return 0
 
 
-
 def writer_file():
     result_file = make_all_file()
     all_date = result_file[result_file["售后状态"]=="无售后或售后取消"]
