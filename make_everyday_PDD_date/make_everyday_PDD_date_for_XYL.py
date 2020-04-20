@@ -28,7 +28,7 @@ def get_money_car(productID):
     yes_time = datetime.datetime.now() + datetime.timedelta(days=-1)
     yes_time = yes_time.strftime('%Y%m%d')
     try:
-        car_money_file_list = glob.glob(r''+man_URL+'file\\搜索推广_账户_分级详情_计划_'+yes_time+'*.xls')
+        car_money_file_list = glob.glob(r''+man_URL+'file\\*.xls')
         for x in car_money_file_list:
             car_money_pd.append(pd.read_excel(x))
         resultpd = pd.concat(car_money_pd)
@@ -71,18 +71,15 @@ class product_link_in:
 def writer_file():
     global boy_name
     result_file = make_all_file()
-    all_date = result_file[result_file["售后状态"]=="无售后或售后取消"]
+    all_date = result_file[(result_file["售后状态"]=="无售后或售后取消")|(result_file["售后状态"]=="售后处理中")]
     all_date["商家备注"] = all_date["商家备注"].str.split(";").str[-1]
     for one_date in read_config_xlsx():
         all_shell = all_date[(all_date["商品id"]==one_date.pid)]["商家实收金额(元)"].sum()
         wb_make_shell = all_date[(all_date["商品id"]==one_date.pid)&(all_date["商家备注"].str.contains("V-"))]["商家实收金额(元)"].sum()
         one_date.sd_money = round(wb_make_shell,2)
-        one_date.shell_money = round(all_shell-(wb_make_shell),2)
+        one_date.shell_money = round(all_shell-wb_make_shell,2)
         one_date.car_money = get_money_car(str(one_date.pid))
-        print(one_date.pid,one_date.car_money,one_date.shell_money,one_date.sd_money,one_date.group)
-    yes_time = datetime.datetime.now() + datetime.timedelta(days=-1)
-    #yes_time_nyr = yes_time.strftime('%Y_%m_%d')
-    yes_time = yes_time.strftime('%Y-%m-%d')
+        #print(one_date.pid,one_date.car_money,one_date.shell_money,one_date.sd_money,one_date.group)
 
     with open(""+man_URL+"result.csv","w",newline = '') as csvfile: 
         writer = csv.writer(csvfile)
