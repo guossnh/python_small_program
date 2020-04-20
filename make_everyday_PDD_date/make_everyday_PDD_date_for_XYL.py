@@ -55,7 +55,6 @@ def read_config_xlsx():
                 product_link_in_list.append(product_link_in(getattr(row, '产品ID'),getattr(row, '店铺'),getattr(row, '产品简称'),getattr(row, '姓名'),0,0,0,x))
     return product_link_in_list
 
-
 #这个是对应每一个产品链接的对象，包括直通车数据，销售额，刷单
 class product_link_in:
     def __init__(self,pid,shop,ename,pname,car_money,shell_money,sd_money,group):
