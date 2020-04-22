@@ -8,14 +8,14 @@ product_list =[]
 product_file_list =[]
 man_URL = "d:\\make_everyday_PDD_date_for_XYL\\"
 product_link_in_list = []#这个是所有产品信息对象的存储
-
+product_name_and_easy_name_list = []
 
 #根据所有文件整合数据在一块放入对象
 def make_all_file():
     #获取桌面的需要统计的所有文件的数据
     def get_file_name_list():
-        now_time = datetime.datetime.now().strftime('%Y-%m-%d')
-        return glob.glob(r''+man_URL+'file\\*'+now_time+'*.csv')
+        #now_time = datetime.datetime.now().strftime('%Y-%m-%d')
+        return glob.glob(r''+man_URL+'file\\*.csv')
     global product_file_list
     for product_file in get_file_name_list():
         product_file_list.append(pd.read_csv(product_file))
@@ -43,7 +43,7 @@ def get_money_car(productID):
 
 #读取配置放产品对象进入对象的数组
 def read_config_xlsx():
-    global man_URL,product_link_in_list
+    global man_URL,product_link_in_list,product_name_and_easy_name_list
     #读取文件并且获取组列表
     xl = pd.read_excel(""+man_URL+"产品数据表格.xlsx",None)
     #去掉数据表格其他的表格名字加入Class_leader
@@ -53,9 +53,24 @@ def read_config_xlsx():
             for row in xl.itertuples():
                 #print(getattr(row, '店铺'), getattr(row, '产品简称'))
                 product_link_in_list.append(product_link_in(getattr(row, '产品ID'),getattr(row, '店铺'),getattr(row, '产品简称'),getattr(row, '姓名'),0,0,0,x))
+        elif(x.find("数据")!= -1):
+            xl = pd.read_excel(""+man_URL+"产品数据表格.xlsx",x)
+            for row in xl.itertuples():
+                product_name_and_easy_name_list.append(product_name_and_easy_name(getattr(row, '产品名称'),getattr(row, '产品简称')))
     return product_link_in_list
 
+def find_product_full_name(easyname):
+    global product_name_and_easy_name_list
+    for x in product_name_and_easy_name_list:
+        if(x.ename==easyname):
+            return x.name
+    return "没有名字"
 
+#这个是匹配每一个产品简称和全程的类
+class product_name_and_easy_name:
+    def __init__(self,name,ename):
+        self.name = name
+        self.ename = ename
 #这个是对应每一个产品链接的对象，包括直通车数据，销售额，刷单
 class product_link_in:
     def __init__(self,pid,shop,ename,pname,car_money,shell_money,sd_money,group):
@@ -83,15 +98,14 @@ def writer_file():
 
     with open(""+man_URL+"result.csv","w",newline = '') as csvfile: 
         writer = csv.writer(csvfile)
-        writer.writerow(["姓名","组","店","产品ID","产品简称","销量","刷单","直通车"])
+        writer.writerow(["姓名","组","店","产品ID","产品全称","销量","刷单","直通车"])
         for i in product_link_in_list:
             #if((i.shell_money==0) & (i.sd_money==0)):
             #    pass
             #else:
             #    writer.writerow()
-            writer.writerow([i.pname,i.group,i.shop,i.pid,i.pname,i.shell_money,i.sd_money,i.car_money])
-
-
+            full_name = find_product_full_name(i.ename)
+            writer.writerow([i.pname,i.group,i.shop,i.pid,full_name,i.shell_money,i.sd_money,i.car_money])
 
 if __name__ == "__main__":
     writer_file()
