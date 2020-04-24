@@ -56,7 +56,7 @@ def write_result():
     oneday_data.to_csv(""+man_url+"这里看结果文件\\"+now_time+"需要处理的电话号码.csv",sep=',',index=False)
     #追加差值文件到总数据文件
     allday_data = allday_data.append(oneday_data)
-    #allday_data.to_csv(""+man_url+"all_data.csv",sep=',',index=False)
+    allday_data.to_csv(""+man_url+"all_data.csv",sep=',',index=False)
 
     #生成需要发短信的文件
     for row in getID_pd.itertuples():
@@ -71,7 +71,7 @@ def write_result():
                 f.write(""+pname+shop+"的"+ename+"\n")
                 phone_list = ""
                 for row in one_product.itertuples():
-                    phone_list = phone_list +","+ getattr(row, '手机').strip()
+                    phone_list = phone_list +","+ str(getattr(row, '手机')).strip()
                 f.write(phone_list[1:]+"\n")
                 f.close()
 
