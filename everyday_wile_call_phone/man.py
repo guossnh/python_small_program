@@ -11,7 +11,7 @@ man_url = "d:\\everyday_wile_call_phone\\"
 def return_pd_package():
     product_file_list = []
     def get_all_file_list():
-        return glob.glob(r''+man_url+'这里放入你下载的文件\\PACKCENTER-EXPORT*.csv')
+        return glob.glob(r''+man_url+'in\\PACKCENTER-EXPORT*.csv')
     for product_file in get_all_file_list():
         product_file_list.append(pd.read_csv(product_file))
     return pd.concat(product_file_list)
@@ -21,7 +21,7 @@ def return_pd_order():
     product_file_list = []
     def get_all_file_list():
         now_time = datetime.datetime.now().strftime('%Y-%m-%d')
-        return glob.glob(r''+man_url+'这里放入你下载的文件\\*'+now_time+'*.csv')
+        return glob.glob(r''+man_url+'in\\*'+now_time+'*.csv')
     for product_file in get_all_file_list():
         product_file_list.append(pd.read_csv(product_file))
     return pd.concat(product_file_list)
@@ -44,7 +44,7 @@ def write_result():
     oneday_data = pd.merge(im_pd, getID_pd, how='left', left_on='商品id',right_on='产品ID')
     oneday_data = oneday_data[["订单号","商品id","手机","店铺","姓名","产品简称"]]
     oneday_data = oneday_data[oneday_data["姓名"].notnull()]#去除不需要统计的值
-    #oneday_data.to_csv(""+man_url+"这里看结果文件\\cha1.csv",sep=',',index=False)
+    #oneday_data.to_csv(""+man_url+"in\\cha1.csv",sep=',',index=False)
 
     #获取之前记录的对象的值
     allday_data = pd.read_csv(""+man_url+"all_data.csv")
@@ -53,7 +53,7 @@ def write_result():
     oneday_data = oneday_data.drop_duplicates(subset=['订单号'],keep=False)
     now_time = datetime.datetime.now().strftime('%Y-%m-%d')
 
-    oneday_data.to_csv(""+man_url+"这里看结果文件\\"+now_time+"需要处理的电话号码.csv",sep=',',index=False)
+    oneday_data.to_csv(""+man_url+"out\\"+now_time+"需要处理的电话号码.csv",sep=',',index=False)
     #追加差值文件到总数据文件
     allday_data = allday_data.append(oneday_data)
     allday_data.to_csv(""+man_url+"all_data.csv",sep=',',index=False)
@@ -67,7 +67,7 @@ def write_result():
         if(one_product.empty):
             pass
         else:
-            with open(""+man_url+"这里看结果文件\\"+now_time+"需要发短信的数据.txt","a+") as f:
+            with open(""+man_url+"out\\"+now_time+"需要发短信的数据.txt","a+") as f:
                 f.write(""+pname+shop+"的"+ename+"\n")
                 phone_list = ""
                 for row in one_product.itertuples():
