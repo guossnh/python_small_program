@@ -6,7 +6,7 @@ import time,os,datetime,glob,sys,csv,xlrd
 boy_name = ""
 product_list =[]
 product_file_list =[]
-man_URL = "d:\\make_everyday_PDD_date_for_XYL\\"
+man_URL = "d:\\make_everyday_PDD_date_for_KJ\\"
 product_link_in_list = []#这个是所有产品信息对象的存储
 product_name_and_easy_name_list = []
 
