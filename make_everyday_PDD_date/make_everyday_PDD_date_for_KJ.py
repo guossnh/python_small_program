@@ -52,7 +52,7 @@ def read_config_xlsx():
             xl = pd.read_excel(""+man_URL+"产品数据表格.xlsx",x)
             for row in xl.itertuples():
                 #print(getattr(row, '店铺'), getattr(row, '产品简称'))
-                product_link_in_list.append(product_link_in(getattr(row, '产品ID'),getattr(row, '店铺'),getattr(row, '产品简称'),getattr(row, '姓名'),0,0,0,x))
+                product_link_in_list.append(product_link_in(getattr(row, '产品ID'),getattr(row, '店铺'),getattr(row, '产品简称'),getattr(row, '姓名'),0,0,0,0,x))
         elif(x.find("数据")!= -1):
             xl = pd.read_excel(""+man_URL+"产品数据表格.xlsx",x)
             for row in xl.itertuples():
