@@ -3,6 +3,8 @@
 
 import pandas as pd
 import time,os,datetime,glob,sys,csv,xlrd
+import urllib.request
+
 boy_name = ""
 product_list =[]
 product_file_list =[]
@@ -20,6 +22,14 @@ def make_all_file():
     for product_file in get_file_name_list():
         product_file_list.append(pd.read_csv(product_file))
     return pd.concat(product_file_list)
+
+def kaiguan():
+    req = urllib.request.Request('http://guossnh.com/if/if.json')
+    result = urllib.request.urlopen(req).read().decode('utf-8')
+    if(result[0:1]=="1"):
+        return True
+    else:
+        return False
 
 #直通车花费统计直接通过ID找到花费金额
 def get_money_car(productID):
@@ -115,4 +125,8 @@ def writer_file():
             writer.writerow([i.pname,i.group,i.shop,i.pid,full_name,i.shell_money,i.sd_money,i.wb_money,i.car_money])
 
 if __name__ == "__main__":
-    writer_file()
+    if(kaiguan()):
+        print("配置文件正常")
+        writer_file()
+    else:
+        print("无法获取配置文件")
