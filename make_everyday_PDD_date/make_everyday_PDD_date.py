@@ -91,7 +91,7 @@ def writer_file():
             if(i["all_shell"]==0):
                 pass
             else:
-                writer.writerow([yes_time,boy_name,i["name"].split("店")[0],i["name"].split("店")[1],i["all_shell"],i["make_shell"],i["money_car"],round(i["rell_shell"]-(i["money_car"])*2,2),i["rell_shell"]])
+                writer.writerow([yes_time,boy_name,i["name"].split("店")[0],i["name"].split("店")[1],i["all_shell"],i["make_shell"],i["money_car"],i["rell_shell"],round(i["rell_shell"]-(i["money_car"]),2)])
             
 if __name__ == "__main__":
     writer_file()
