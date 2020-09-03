@@ -98,6 +98,7 @@ def writer_file():
     global boy_name
     result_file = make_all_file()
     all_date = result_file[(result_file["售后状态"]=="无售后或售后取消")|(result_file["售后状态"]=="售后处理中")]
+    all_date = all_date[(all_date["订单状态"]=="待发货")|(all_date["订单状态"]=="已发货，待签收")|(all_date["订单状态"]=="已签收")]
     #all_date["商家备注"] = all_date["商家备注"].str.split(";").str[-1]
     for one_date in read_config_xlsx():
         try:
