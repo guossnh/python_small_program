@@ -87,6 +87,7 @@ class product_link_in:
 def writer_file():
     global boy_name
     result_file = make_all_file()
+    result_file = result_file.drop_duplicates(['订单号'])
     all_date = result_file[(result_file["售后状态"]=="无售后或售后取消")|(result_file["售后状态"]=="售后处理中")]
     #all_date["商家备注"] = all_date["商家备注"].str.split(";").str[-1]
     for one_date in read_config_xlsx():

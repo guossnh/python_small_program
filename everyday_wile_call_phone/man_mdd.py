@@ -36,13 +36,16 @@ def return_today_wile_phone():
     all_pd = all_pd[(all_pd["包裹状态"]=="已签收")&(all_pd["订单状态"]=="已发货，待签收")]
     return all_pd
 
+#通过订单号查找手机号的方法、
+def return_phone_num():
+    pass
 
 #需要生成的结果文件都需要什么内容   订单号 商品ID 电话  店铺  产品简称
 def write_result():
     im_pd = return_today_wile_phone()
     getID_pd = pd.read_excel(""+man_url+"需要打电话产品统计.xlsx")
     oneday_data = pd.merge(im_pd, getID_pd, how='left', left_on='商品id',right_on='产品ID')
-    oneday_data = oneday_data[["订单号","商品id","手机","店铺","姓名","产品简称"]]
+    oneday_data = oneday_data[["订单号","商品id","店铺","姓名","产品简称"]]
     oneday_data = oneday_data[oneday_data["姓名"].notnull()]#去除不需要统计的值
     #oneday_data.to_csv(""+man_url+"in\\cha1.csv",sep=',',index=False)
 
@@ -60,21 +63,21 @@ def write_result():
 
     
     #生成需要发短信的文件
-    for row in getID_pd.itertuples():
-        pname = getattr(row, '姓名')
-        shop = getattr(row, '店铺')
-        ename = getattr(row, '产品简称')
-        one_product = oneday_data[(oneday_data["姓名"]==pname)&(oneday_data["店铺"]==shop)&(oneday_data["产品简称"]==ename)]
-        if(one_product.empty):
-            pass
-        else:
-            with open(""+man_url+"out\\"+now_time+"需要发短信的数据.txt","a+") as f:
-                f.write(""+pname+shop+"的"+ename+"\n")
-                phone_list = ""
-                for row in one_product.itertuples():
-                    phone_list = phone_list +","+ str(getattr(row, '手机')).strip()
-                f.write(phone_list[1:]+"\n")
-                f.close()
+    #for row in getID_pd.itertuples():
+    #    pname = getattr(row, '姓名')
+    #    shop = getattr(row, '店铺')
+    #    ename = getattr(row, '产品简称')
+    #    one_product = oneday_data[(oneday_data["姓名"]==pname)&(oneday_data["店铺"]==shop)&(oneday_data["产品简称"]==ename)]
+    #    if(one_product.empty):
+    #        pass
+    #    else:
+    #        with open(""+man_url+"out\\"+now_time+"需要发短信的数据.txt","a+") as f:
+    #            f.write(""+pname+shop+"的"+ename+"\n")
+    #            phone_list = ""
+    #            for row in one_product.itertuples():
+    #                phone_list = phone_list +","+ str(getattr(row, '手机')).strip()
+    #            f.write(phone_list[1:]+"\n")
+    #            f.close()
 
 
     
