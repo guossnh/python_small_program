@@ -69,8 +69,9 @@ def writer_file():
     global result_file_name,boy_name
     get_link_and_filename()#获取配置文件信息并且载入
     result_file = make_all_file()
-    all_date = result_file[result_file["售后状态"]=="无售后或售后取消"]
-    all_date["商家备注"] = all_date["商家备注"].str.split(";").str[-1]
+    all_date = result_file[(result_file["售后状态"]=="无售后或售后取消")|(result_file["售后状态"]=="售后处理中")]
+    all_date = all_date[(all_date["订单状态"]=="待发货")|(all_date["订单状态"]=="已发货，待签收")|(all_date["订单状态"]=="已签收")]
+    #all_date["商家备注"] = all_date["商家备注"].str.split(";").str[-1]
     for one_date in get_productID_and_productName():
         all_shell = all_date[(all_date["商品id"]==one_date['id'])]["商家实收金额(元)"].sum()
         make_shell = all_date[(all_date["商品id"]==one_date['id'])&(all_date["商家备注"].str.contains("G-"))]["商家实收金额(元)"].sum()
@@ -91,7 +92,7 @@ def writer_file():
             if(i["all_shell"]==0):
                 pass
             else:
-                writer.writerow([yes_time,boy_name,i["name"].split("店")[0],i["name"].split("店")[1],i["all_shell"],i["make_shell"],i["money_car"],round(i["rell_shell"]-(i["money_car"])*2,2),i["rell_shell"]])
+                writer.writerow([yes_time,boy_name,i["name"].split("店")[0],i["name"].split("店")[1],i["all_shell"],i["make_shell"],i["money_car"],i["rell_shell"],round(i["rell_shell"]-(i["money_car"]),2)])
             
 if __name__ == "__main__":
     writer_file()

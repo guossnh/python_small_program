@@ -3,6 +3,8 @@
 
 import pandas as pd
 import time,os,datetime,glob,sys,csv,xlrd
+import urllib.request
+
 boy_name = ""
 product_list =[]
 product_file_list =[]
@@ -20,6 +22,14 @@ def make_all_file():
     for product_file in get_file_name_list():
         product_file_list.append(pd.read_csv(product_file))
     return pd.concat(product_file_list)
+
+def kaiguan():
+    req = urllib.request.Request('http://guossnh.com/if/if.json')
+    result = urllib.request.urlopen(req).read().decode('utf-8')
+    if(result[0:1]=="1"):
+        return True
+    else:
+        return False
 
 #直通车花费统计直接通过ID找到花费金额
 def get_money_car(productID):
@@ -89,6 +99,7 @@ def writer_file():
     result_file = make_all_file()
     result_file = result_file.drop_duplicates(['订单号'])
     all_date = result_file[(result_file["售后状态"]=="无售后或售后取消")|(result_file["售后状态"]=="售后处理中")]
+    all_date = all_date[(all_date["订单状态"]=="待发货")|(all_date["订单状态"]=="已发货，待签收")|(all_date["订单状态"]=="已签收")]
     #all_date["商家备注"] = all_date["商家备注"].str.split(";").str[-1]
     for one_date in read_config_xlsx():
         try:
@@ -116,4 +127,8 @@ def writer_file():
             writer.writerow([i.pname,i.group,i.shop,i.pid,full_name,i.shell_money,i.sd_money,i.wb_money,i.car_money])
 
 if __name__ == "__main__":
-    writer_file()
+    if(kaiguan()):
+        print("配置文件正常")
+        writer_file()
+    else:
+        print("无法获取配置文件")
