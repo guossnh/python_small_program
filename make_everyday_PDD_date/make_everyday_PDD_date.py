@@ -52,14 +52,14 @@ def get_money_car(productID):
     yes_time = datetime.datetime.now() + datetime.timedelta(days=-1)
     yes_time = yes_time.strftime('%Y%m%d')
     try:
-        car_money_file_list = glob.glob(r''+desktop_link+'搜索推广_账户_分级详情_计划_'+yes_time+'*.xls')
+        car_money_file_list = glob.glob(r''+desktop_link+'*_账户_分级详情_计划_'+yes_time+'*.xls')
         for x in car_money_file_list:
             car_money_pd.append(pd.read_excel(x))
         resultpd = pd.concat(car_money_pd)
         #print(resultpd['花费(元)'])#print(resultpd['花费(元)'])
         one_resultpd = resultpd[(resultpd['推广计划'].str.find(productID, start=0, end=None)>=0)]
         if(len(one_resultpd)):
-            return one_resultpd["花费(元)"].values[0]
+            return one_resultpd["花费(元)"].sum()
         else:
             return 0
     except:

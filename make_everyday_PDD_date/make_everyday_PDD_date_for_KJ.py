@@ -45,7 +45,7 @@ def get_money_car(productID):
         #print(resultpd['花费(元)'])#print(resultpd['花费(元)'])
         one_resultpd = resultpd[(resultpd['推广计划'].str.find(productID, start=0, end=None)>=0)]
         if(len(one_resultpd)):
-            return one_resultpd["花费(元)"].values[0]
+            return one_resultpd["花费(元)"].sum()
         else:
             return 0
     except:
