@@ -30,17 +30,14 @@ def kaiguan():
     else:
         return False
 
-
 #开始写入文件
 def writer_file():
     asd = get_list()
     asd.to_excel(""+man_URL+"all.xlsx")
 
-
-
 if __name__ == "__main__":
     if(kaiguan()):
-        print("配置文件正常")
+        print("写入文件正常")
         writer_file()
     else:
-        print("无法获取配置文件")
+        print("写入文件异常")
