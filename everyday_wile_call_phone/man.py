@@ -42,7 +42,7 @@ def write_result():
     im_pd = return_today_wile_phone()
     getID_pd = pd.read_excel(""+man_url+"需要打电话产品统计.xlsx")
     oneday_data = pd.merge(im_pd, getID_pd, how='left', left_on='商品id',right_on='产品ID')
-    oneday_data = oneday_data[["订单号","商品id","手机","店铺","姓名","产品简称"]]
+    oneday_data = oneday_data[["订单号","商品id","店铺","姓名","产品简称"]]
     oneday_data = oneday_data[oneday_data["姓名"].notnull()]#去除不需要统计的值
     #oneday_data.to_csv(""+man_url+"in\\cha1.csv",sep=',',index=False)
 
@@ -58,7 +58,6 @@ def write_result():
     allday_data = allday_data.append(oneday_data)
     allday_data.to_csv(""+man_url+"all_data.csv",sep=',',index=False)
 
-    
     #生成需要发短信的文件
     for row in getID_pd.itertuples():
         pname = getattr(row, '姓名')

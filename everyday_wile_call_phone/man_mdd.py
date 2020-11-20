@@ -45,7 +45,7 @@ def write_result():
     im_pd = return_today_wile_phone()
     getID_pd = pd.read_excel(""+man_url+"需要打电话产品统计.xlsx")
     oneday_data = pd.merge(im_pd, getID_pd, how='left', left_on='商品id',right_on='产品ID')
-    oneday_data = oneday_data[["订单号","商品id","店铺","姓名","产品简称"]]
+    oneday_data = oneday_data[["订单号","商品id","店铺","姓名","产品简称","物流公司","运单号"]]
     oneday_data = oneday_data[oneday_data["姓名"].notnull()]#去除不需要统计的值
     #oneday_data.to_csv(""+man_url+"in\\cha1.csv",sep=',',index=False)
 
@@ -55,8 +55,10 @@ def write_result():
     oneday_data = oneday_data.append(allday_data)
     oneday_data = oneday_data.drop_duplicates(subset=['订单号'],keep=False)
     now_time = datetime.datetime.now().strftime('%Y-%m-%d')
-
-    oneday_data.to_csv(""+man_url+"out\\"+now_time+"需要处理的电话号码.csv",sep=',',index=False)
+    #oneday_data['商品id'] = oneday_data['商品id'].round(decimals=0)
+    #oneday_data['运单号'] = oneday_data['运单号'].round(decimals=0)
+    #print(oneday_data)
+    oneday_data.to_csv(""+man_url+"out\\"+now_time+"需要处理的电话号码.csv",sep=',',index=False,float_format='%.0f')
     #追加差值文件到总数据文件
     allday_data = allday_data.append(oneday_data)
     allday_data.to_csv(""+man_url+"all_data.csv",sep=',',index=False)
