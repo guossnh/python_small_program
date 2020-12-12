@@ -135,27 +135,34 @@ def writer_file():
         sd_money.append(i.sd_money)
         wb_money.append(i.wb_money)
         car_money.append(i.car_money)
-    dit ={"pname":pname,"group":group,"shop":shop,"pid":pid,"ename":ename,"shell_money":shell_money,"sd_money":sd_money,"wb_money":wb_money,"car_money":car_money}
+    dit ={"姓名":pname,"组":group,"店名":shop,"pid":pid,"产品简称":ename,"真实销售额":shell_money,"刷单":sd_money,"放单":wb_money,"直通车":car_money}
     df =pd.DataFrame(dit)
-    print(df)
+    #print(df)
 
+    yes_time = datetime.datetime.now() + datetime.timedelta(days=-1)
+    yes_time = yes_time.strftime('%Y-%m-%d')
+    df["日期"] = yes_time
     #输出个人销量文件
-    df1 = pd.pivot_table(df,index=['pname'],values=['shell_money','sd_money','wb_money','car_money'],aggfunc=np.sum).round(2)
-    df1.rename(columns={'pname':'姓名','shell_money':'真实销售额','sd_money':'刷单','wb_money':'放单','car_money':"直通车"},inplace = True)
+    df1 = pd.pivot_table(df,index=['日期','姓名','店名','产品简称'],values=['真实销售额','刷单','放单','直通车'],aggfunc=np.sum).round(2)
+    #df1.rename(columns={'pname':'姓名','shop':'店名','ename':'产品简称','shell_money':'真实销售额','sd_money':'刷单','wb_money':'放单','car_money':"直通车"},inplace = True)
+    #print(df1)
+    df1=df1[(df1["真实销售额"]!=0.0)|(df1["刷单"]!=0.0)|(df1["放单"]!=0.0)|(df1["直通车"]!=0.0)]
+    #df1["日期"] = yes_time
     print(df1)
-    df1.to_csv(""+man_URL+datetime.datetime.now().strftime('%Y%m%d')+"每个人销量文件.csv",sep=',')
+    df1 = df1[['真实销售额','刷单','放单','直通车']]
+    df1.to_csv(""+man_URL+yes_time+"每个人销量文件.csv",sep=',')
 
-    #with open(""+man_URL+"result.csv","w",newline = '') as csvfile: 
-    #    writer = csv.writer(csvfile)
-    #    writer.writerow(["姓名","组","店","产品ID","产品全称","销量","刷单","放单","直通车"])
-    #    for i in product_link_in_list:
-    #        #if((i.shell_money==0) & (i.sd_money==0)):
-    #        #    pass
-    #        #else:
-    #        #    writer.writerow()
-    #        full_name = find_product_full_name(i.ename)
-    #        writer.writerow([i.pname,i.group,i.shop,i.pid,full_name,i.shell_money,i.sd_money,i.wb_money,i.car_money])
-    
+    with open(""+man_URL+"result.csv","w",newline = '') as csvfile: 
+        writer = csv.writer(csvfile)
+        writer.writerow(["姓名","组","店","产品ID","产品全称","销量","刷单","放单","直通车"])
+        for i in product_link_in_list:
+            #if((i.shell_money==0) & (i.sd_money==0)):
+            #    pass
+            #else:
+            #    writer.writerow()
+            full_name = find_product_full_name(i.ename)
+            writer.writerow([i.pname,i.group,i.shop,i.pid,full_name,i.shell_money,i.sd_money,i.wb_money,i.car_money])
+
 if __name__ == "__main__":
     if(kaiguan()):
         print("配置文件正常")
