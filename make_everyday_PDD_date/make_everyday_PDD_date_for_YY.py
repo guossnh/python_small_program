@@ -9,7 +9,7 @@ import urllib.request
 boy_name = ""
 product_list =[]
 product_file_list =[]
-man_URL = "e:\\make_everyday_PDD_date_for_YY\\"
+man_URL = "d:\\make_everyday_PDD_date_for_YY\\"
 product_link_in_list = []#这个是所有产品信息对象的存储
 product_name_and_easy_name_list = []
 
@@ -61,9 +61,12 @@ def read_config_xlsx():
     for x in xl.keys():
         if(x.find("组")!= -1):
             xl = pd.read_excel(""+man_URL+"产品数据表格.xlsx",x)
+            xl['产品ID'] = pd.to_numeric(xl['产品ID'], errors='coerce')
+            xl = xl.dropna(subset=['产品ID'])
+            #xl['产品ID'] = xl['产品ID'].astype(int)
             for row in xl.itertuples():
                 #print(getattr(row, '店铺'), getattr(row, '产品简称'))
-                product_link_in_list.append(product_link_in(getattr(row, '产品ID'),getattr(row, '店铺'),getattr(row, '产品简称'),getattr(row, '姓名'),0,0,0,0,x))
+                product_link_in_list.append(product_link_in(int(getattr(row, '产品ID')),getattr(row, '店铺'),getattr(row, '产品简称'),getattr(row, '姓名'),0,0,0,0,x))
         elif(x.find("数据")!= -1):
             xl = pd.read_excel(""+man_URL+"产品数据表格.xlsx",x)
             for row in xl.itertuples():
@@ -102,6 +105,7 @@ def writer_file():
     all_date = result_file[(result_file["售后状态"]=="无售后或售后取消")|(result_file["售后状态"]=="售后处理中")]
     all_date = all_date[(all_date["订单状态"]=="待发货")|(all_date["订单状态"]=="已发货，待签收")|(all_date["订单状态"]=="已签收")]
     #all_date["商家备注"] = all_date["商家备注"].str.split(";").str[-1]
+    all_date["商品id"].astype("str")
     for one_date in read_config_xlsx():
         try:
             all_shell = all_date[(all_date["商品id"]==one_date.pid)]["商家实收金额(元)"].sum()
@@ -135,7 +139,7 @@ def writer_file():
         sd_money.append(i.sd_money)
         wb_money.append(i.wb_money)
         car_money.append(i.car_money)
-    dit ={"姓名":pname,"组":group,"店名":shop,"pid":pid,"产品简称":ename,"真实销售额":shell_money,"刷单":sd_money,"放单":wb_money,"直通车":car_money}
+    dit ={"姓名":pname,"组":group,"店名":shop,"ID":pid,"产品简称":ename,"真实销售额":shell_money,"刷单":sd_money,"放单":wb_money,"直通车":car_money}
     df =pd.DataFrame(dit)
     #print(df)
 
@@ -143,10 +147,11 @@ def writer_file():
     yes_time = yes_time.strftime('%Y-%m-%d')
     df["日期"] = yes_time
     #输出个人销量文件
-    df1 = pd.pivot_table(df,index=['日期','姓名','店名','产品简称'],values=['真实销售额','刷单','放单','直通车'],aggfunc=np.sum).round(2)
+    df1 = pd.pivot_table(df,index=['日期','姓名','店名','产品简称','ID'],values=['真实销售额','刷单','放单','直通车'],aggfunc=np.sum).round(2)
     #df1.rename(columns={'pname':'姓名','shop':'店名','ename':'产品简称','shell_money':'真实销售额','sd_money':'刷单','wb_money':'放单','car_money':"直通车"},inplace = True)
     #print(df1)
-    df1=df1[(df1["真实销售额"]!=0.0)|(df1["刷单"]!=0.0)|(df1["放单"]!=0.0)|(df1["直通车"]!=0.0)]
+    #去除是0的行
+    #df1=df1[(df1["真实销售额"]!=0.0)|(df1["刷单"]!=0.0)|(df1["放单"]!=0.0)|(df1["直通车"]!=0.0)]
     #df1["日期"] = yes_time
     print(df1)
     df1 = df1[['真实销售额','刷单','放单','直通车']]
