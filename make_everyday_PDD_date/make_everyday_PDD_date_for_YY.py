@@ -157,16 +157,18 @@ def writer_file():
     df1 = df1[['真实销售额','刷单','放单','直通车']]
     df1.to_csv(""+man_URL+yes_time+"每个人销量文件.csv",sep=',')
 
-    with open(""+man_URL+"result.csv","w",newline = '') as csvfile: 
-        writer = csv.writer(csvfile)
-        writer.writerow(["姓名","组","店","产品ID","产品全称","销量","刷单","放单","直通车"])
-        for i in product_link_in_list:
-            #if((i.shell_money==0) & (i.sd_money==0)):
-            #    pass
-            #else:
-            #    writer.writerow()
-            full_name = find_product_full_name(i.ename)
-            writer.writerow([i.pname,i.group,i.shop,i.pid,full_name,i.shell_money,i.sd_money,i.wb_money,i.car_money])
+
+    #这块内容不需要先不要生成了
+    #with open(""+man_URL+"result.csv","w",newline = '') as csvfile: 
+    #    writer = csv.writer(csvfile)
+    #    writer.writerow(["姓名","组","店","产品ID","产品全称","销量","刷单","放单","直通车"])
+    #    for i in product_link_in_list:
+    #        #if((i.shell_money==0) & (i.sd_money==0)):
+    #        #    pass
+    #        #else:
+    #        #    writer.writerow()
+    #        full_name = find_product_full_name(i.ename)
+    #        writer.writerow([i.pname,i.group,i.shop,i.pid,full_name,i.shell_money,i.sd_money,i.wb_money,i.car_money])
 
 if __name__ == "__main__":
     if(kaiguan()):
