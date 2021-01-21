@@ -1,6 +1,6 @@
 #-*- coding : utf-8 -*-
 """
-这个主要是从微薄利寻找刷单的单子并且能够点击确定
+这个主要是从微薄利寻找刷单的单子并且能够点击确定1
 """
 import time
 from selenium import webdriver
