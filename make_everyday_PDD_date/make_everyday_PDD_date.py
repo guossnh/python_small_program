@@ -274,7 +274,7 @@ def compute_result(df,shell_date):
     shell_date["商品id"].astype("str")
     #遍历掉df 然后插入当前ID的销售额放单刷单直通车和生成扣直通车和刷单放单之后的销售额
     for df, row in df.iterrows:
-        pass
+        pass 
 
 
     
