@@ -39,9 +39,9 @@ def writer_file():
     #清理数据
     asd.dropna(axis=0, how='all', inplace=True)
 
-    asd = asd[asd["商户订单号"].str.contains('\#')==False]
-    
-    asd.to_csv(""+man_URL+"all.csv",index=False)
+    asd = asd[ ~ asd["商户订单号"].str.contains('#',na=False)]
+
+    asd.to_csv(""+man_URL+"all.csv",index=False,encoding="utf-8-sig")
 
 if __name__ == "__main__":
     if(kaiguan()):

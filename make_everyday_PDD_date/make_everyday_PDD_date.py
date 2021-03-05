@@ -288,7 +288,7 @@ def compute_result(df,shell_date):
             one_date.shell_money = round(all_shell-wb_make_shell-sd_make_shell,2)
             one_date.car_money = get_money_car(str(one_date.pid))
         except:
-            pass  
+            pass
 
 
 
