@@ -272,12 +272,12 @@ def compute_result(df,shell_date):
     shell_date = shell_date[(shell_date["订单状态"]=="待发货")|(shell_date["订单状态"]=="已发货，待签收")|(shell_date["订单状态"]=="已签收")]
 
     shell_date["商品id"].astype("str")
-    #遍历掉df 然后插入当前ID的销售额放单刷单直通车和生成扣直通车和刷单放单之后的销售额
-    for df, row in df.iterrows:
-        pass 
+    #开始计算
+    df = shell_date
 
 
-    
+
+
     for one_date in read_config_xlsx():
         try:
             all_shell = all_date[(all_date["商品id"]==one_date.pid)]["商家实收金额(元)"].sum()
