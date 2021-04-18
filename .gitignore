@@ -13,3 +13,5 @@ build
 gaode.db
 jiandan.db
 *.xlsx
+.DS_Store
+.vscode/settings.json
