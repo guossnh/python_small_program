@@ -12,7 +12,7 @@ man_URL = "d:\\应用\\make_TB_data\\"
 shell_car_data = ""
 
  
- #这个方法调用之后返回住文件夹下边的file文件夹里边的相同后缀名的文件的list
+#这个方法调用之后返回住文件夹下边的file文件夹里边的相同后缀名的文件的list
 def get_file_name_list(last_name):
     return glob.glob(r''+man_URL+'file\\*.'+last_name+'')
 
@@ -30,7 +30,8 @@ def add_GJP_file_for_code():
         except:
             print("读取管家婆文件"+x+"出现错误")
     shell_car_data = pd.concat(gjp_list)
-    #return shell_car_data
+    shell_car_data = shell_car_data[["套餐名称","套餐编码"]]
+    return shell_car_data
 
 
 #这个 方法主要就是并且把产品编码和sku名称拿出来予以对应返
@@ -45,13 +46,40 @@ def get_sku_name_from_code(code):
 
 #获取销量数据
 def get_shell_data():
-    pass
+    shell_data_list = get_file_name_list("xlsx")
+    shell_data_list2 = get_file_name_list("csv")
+    shell_data = []
+    shell_data2 = []
+    for x in shell_data_list:
+        try:
+            shell_data.append(pd.read_excel(x))
+        except:
+            print("读取销量文件"+x+"出现错误")
+    for a in shell_data_list2:
+        try:
+            shell_data2.append(pd.read_csv(a,encoding="gbk"))
+        except:
+            print("读取宝贝文件"+a+"出现错误")
+    shell_data = pd.concat(shell_data)
+    shell_data2 = pd.concat(shell_data2)
+    #转换需要的数据格式并且去除特殊字符
+    shell_data["订单编号"] = shell_data["订单编号"].astype(str)
+    shell_data2["订单编号"] = shell_data2["订单编号"].map(lambda x: str(x).lstrip('=').rstrip('=')).astype(str)
+    shell_data2["订单编号"] = shell_data2["订单编号"].map(lambda x: str(x).lstrip('"').rstrip('"')).astype(str)
+    #合并数据表和宝贝表
+    shell_data = pd.merge(shell_data, shell_data2, how='left', on='订单编号')
+    #返回数据
+    return shell_data
 
-
-def content():
-    #流程如下 首先合并管家婆导出的文件这样可以实现编码和产品sku名字对应
-    add_GJP_file_for_code()
+def make_data():
+    shell_data = get_shell_data()
+    gjp_data = add_GJP_file_for_code()
+    #筛选订单状态并且去除已经关闭的订单
+    shell_data = shell_data[(shell_data["订单状态_x"]=="卖家已发货，等待买家确认")|(shell_data["订单状态_x"]=="交易成功")]
+    #链接管家婆表格
+    shell_data = pd.merge(shell_data, gjp_data, how='left', left_on='商家编码', right_on='套餐编码')
+    #shell_data.to_csv(""+man_URL+"wocoa.csv")
 
 
 if __name__ == "__main__":
-    content()#调用主要方法
+    make_data()#调用主要方法
