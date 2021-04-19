@@ -2,7 +2,6 @@
 #-*- coding : utf-8 -*-
 #主要是拼合文件csvt特殊表头的文件
 
-
 #到时候需要检测文件的密码
 
 import pandas as pd
@@ -40,8 +39,14 @@ def get_sku_name_from_code(code):
     #可以上边的页面 先测试再查找坐标
     global shell_car_data
     shell_car_data[shell_car_data["套餐编码"]==code].index.tolist()
+
     
     #判断数组是不是为空如
+
+#获取销量数据
+def get_shell_data():
+    pass
+
 
 def content():
     #流程如下 首先合并管家婆导出的文件这样可以实现编码和产品sku名字对应
