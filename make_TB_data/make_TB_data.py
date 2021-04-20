@@ -78,7 +78,17 @@ def make_data():
     shell_data = shell_data[(shell_data["订单状态_x"]=="卖家已发货，等待买家确认")|(shell_data["订单状态_x"]=="交易成功")]
     #链接管家婆表格
     shell_data = pd.merge(shell_data, gjp_data, how='left', left_on='商家编码', right_on='套餐编码')
-    #shell_data.to_csv(""+man_URL+"wocoa.csv")
+    #生成店铺统计销量
+    df1 = shell_data.pivot_table(index="店铺名称",values="买家实际支付金额",aggfunc = 'sum')
+    #生成没有备注的店铺和订单
+    df2 = shell_data
+    
+    
+    #开始制作数据文件  需要几块内容  
+    #根据店铺统计销量
+    #根据每个人每个店每产品统计销售额
+    #统计没有备注的销售单号和店铺
+    #外加 ~~~看看能不能统计出销售单品的数量
 
 
 if __name__ == "__main__":
