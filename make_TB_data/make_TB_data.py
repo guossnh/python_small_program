@@ -5,7 +5,7 @@
 #到时候需要检测文件的密码
 
 import pandas as pd
-import glob,os
+import glob,os,openpyxl
 import urllib.request   
 
 man_URL = "d:\\应用\\make_TB_data\\"
@@ -16,6 +16,28 @@ shell_car_data = ""
 def get_file_name_list(last_name):
     return glob.glob(r''+man_URL+'file\\*.'+last_name+'')
 
+#判断这个对象是刷单还是正常销售
+def return_type(x):
+    try:
+        if((x.find('V-')!= -1)|(x.find('v-')!= -1)|(x.find('V_')!= -1)|(x.find('v_')!= -1)):
+            return "放单"
+        elif((x.find('G-')!= -1)|(x.find('g-')!=-1)|(x.find('G_')!= -1)|(x.find('g_')!=-1)):
+            return "刷单"
+        else:
+            return "真实"
+    except:
+        return "真实"
+
+#清洗商家备注
+def return_remark(y):
+    #抹去的字符串 
+    apk = ["V","v","G","g","_","-","申通","韵达","邮政","顺丰","圆通"]
+    try:
+        for a in apk:
+            y = y.replace(a,'')
+        return y
+    except:
+        return ""
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~华丽的分割线~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #读取读取并且合并多个管家婆下载的文件
@@ -76,20 +98,38 @@ def make_data():
     gjp_data = add_GJP_file_for_code()
     #筛选订单状态并且去除已经关闭的订单
     shell_data = shell_data[(shell_data["订单状态_x"]=="卖家已发货，等待买家确认")|(shell_data["订单状态_x"]=="交易成功")]
+    
+    shell_data = shell_data[(shell_data["买家实际支付金额"]!=1)]
     #链接管家婆表格
     shell_data = pd.merge(shell_data, gjp_data, how='left', left_on='商家编码', right_on='套餐编码')
+
+    #更具备注生成销售类型·数据
+    shell_data['type'] = shell_data.商家备忘.apply(return_type)
+    #清洗备注数据 
+    shell_data['商家备忘2'] = shell_data.商家备忘.apply(return_remark)
+
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~华丽的分割线~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     #生成店铺统计销量
     df1 = shell_data.pivot_table(index="店铺名称",values="买家实际支付金额",aggfunc = 'sum')
+    
     #生成没有备注的店铺和订单
-    df2 = shell_data
-    
-    
-    #开始制作数据文件  需要几块内容  
-    #根据店铺统计销量
-    #根据每个人每个店每产品统计销售额
-    #统计没有备注的销售单号和店铺
-    #外加 ~~~看看能不能统计出销售单品的数量
+    df2 = shell_data[(shell_data["商家备忘"].isnull())|(shell_data["商家备忘"]=="null")]
+    #df2 = shell_data[(shell_data["商家备忘"]=="")]
+    df2 = df2[["店铺名称","订单编号","商家备忘"]]
 
+    #根据每个人每个店每产品统计销售额
+    df3 = shell_data.pivot_table(index=["店铺名称","商家备忘2","套餐名称","type"],values="买家实际支付金额",aggfunc = 'sum')
+
+    shell_data.to_csv(""+man_URL+"wocao.csv")
+    #外加 ~~~看看能不能统计出销售单品的数量
+    with pd.ExcelWriter(r''+man_URL+'result.xlsx') as writer:
+        df1.to_excel(writer, sheet_name='每个店铺销售数据')
+        if(len(df2)):
+            df2.to_excel(writer, sheet_name='没有备注的订单')
+        else:
+            print("kong")
+        df3.to_excel(writer, sheet_name='每人每店每产品销售数据')
+        
 
 if __name__ == "__main__":
     make_data()#调用主要方法
