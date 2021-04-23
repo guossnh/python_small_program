@@ -1,11 +1,10 @@
 #!/usr/bin/python
 #-*- coding : utf-8 -*-
-#主要是拼合文件csvt特殊表头的文件
 
-#到时候需要检测文件的密码
+#ps到时候需要检测文件的密码
 
 import pandas as pd
-import glob,os,openpyxl
+import glob,os,openpyxl,re
 import urllib.request   
 
 man_URL = "d:\\应用\\make_TB_data\\"
@@ -38,10 +37,25 @@ def return_remark(y):
         return y
     except:
         return ""
+def return_product0(z):
+    try:
+        z = re.split(r'(\d+)',z)[0]
+        return z
+    except:
+        return z
+def return_product1(z):
+    try:
+        z = re.split(r'(\d+)',z)[1]
+        return z
+    except:
+        return 0
+def return_product2(z):
+    try:
+        z = re.split(r'(\d+)',z)[2]
+        return z
+    except:
+        return z
     
-    #这里放着拆分商品信息的方法
-    def return_product():
-        pass
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~华丽的分割线~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #读取读取并且合并多个管家婆下载的文件
@@ -98,31 +112,49 @@ def get_shell_data():
     return shell_data
 
 def make_data():
+    #载入数据
     shell_data = get_shell_data()
     gjp_data = add_GJP_file_for_code()
+
+
+    #筛选订单
     #筛选订单状态并且去除已经关闭的订单
     shell_data = shell_data[(shell_data["订单状态_x"]=="卖家已发货，等待买家确认")|(shell_data["订单状态_x"]=="交易成功")]
-    
+    #去除销量是1的订单    
     shell_data = shell_data[(shell_data["买家实际支付金额"]!=1)]
+
+
     #链接管家婆表格
     shell_data = pd.merge(shell_data, gjp_data, how='left', left_on='商家编码', right_on='套餐编码')
 
-    #更具备注生成销售类型·数据
-    shell_data['type'] = shell_data.商家备忘.apply(return_type)
-    #清洗备注数据 
-    shell_data['商家备忘2'] = shell_data.商家备忘.apply(return_remark)
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~华丽的分割线~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #数据处理部分
+    #根据备注生成销售类型·数据
+    shell_data['type'] = shell_data.商家备忘.apply(return_type)
+    
+    #生成清洗过的备注数据
+    shell_data['商家备忘2'] = shell_data.商家备忘.apply(return_remark)
+    
+    #拆分套餐信息
+    #shell_data['套餐名'] = shell_data["套餐名称"].map(lambda x : (re.split(r'(\d+)',x)[0]))#这是另外一个方法不要写没办法写try except 先放弃
+    shell_data['套餐名'] = shell_data.套餐名称.apply(return_product0)
+    shell_data['套餐数量'] = shell_data.套餐名称.apply(return_product1)
+    shell_data['套餐单位'] = shell_data.套餐名称.apply(return_product2)
+    shell_data['套餐数量'] =  shell_data['套餐数量'].astype("int")
+    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~华丽的分割线~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    #生成数据部分
     #生成店铺统计销量
     df1 = shell_data.pivot_table(index="店铺名称",values="买家实际支付金额",aggfunc = 'sum')
     
     #生成没有备注的店铺和订单
     df2 = shell_data[(shell_data["商家备忘"].isnull())|(shell_data["商家备忘"]=="null")]
+
     #df2 = shell_data[(shell_data["商家备忘"]=="")]
     df2 = df2[["店铺名称","订单编号","商家备忘"]]
 
     #根据每个人每个店每产品统计销售额
-    df3 = shell_data.pivot_table(index=["店铺名称","商家备忘2","套餐名称","type"],values="买家实际支付金额",aggfunc = 'sum')
+    df3 = shell_data.pivot_table(index=["店铺名称","商家备忘2","套餐名","type"],aggfunc={"买家实际支付金额": [sum], "套餐数量": [sum]})
 
     shell_data.to_csv(""+man_URL+"wocao.csv")
     #外加 ~~~看看能不能统计出销售单品的数量
