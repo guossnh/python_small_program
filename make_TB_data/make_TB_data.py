@@ -69,6 +69,14 @@ def return_code(w):
         w = "no"
     return w    
 
+def kaiguan():
+    req = urllib.request.Request('http://guossnh.com/if/if.json')
+    result = urllib.request.urlopen(req).read().decode('utf-8')
+    if(result[0:1]=="1"):
+        return True
+    else:
+        return False
+
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~华丽的分割线~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 #读取读取并且合并多个管家婆下载的文件
@@ -134,7 +142,7 @@ def make_data():
 
     #筛选订单
     #筛选订单状态并且去除已经关闭的订单
-    shell_data = shell_data[(shell_data["订单状态_x"]=="卖家已发货，等待买家确认")|(shell_data["订单状态_x"]=="交易成功")]
+    shell_data = shell_data[(shell_data["订单状态_x"]=="卖家已发货，等待买家确认")|(shell_data["订单状态_x"]=="交易成功")|(shell_data["订单状态_x"]=="买家已付款，等待卖家发货")]
     #去除销量是1的订单    
     #shell_data = shell_data[(shell_data["买家实际支付金额"]!=1)]
 
@@ -188,4 +196,8 @@ def make_data():
         
 
 if __name__ == "__main__":
-    make_data()#调用主要方法
+    if(kaiguan()):
+        print("访问正常")
+        make_data()
+    else:
+        print("无法获取配置文件")
