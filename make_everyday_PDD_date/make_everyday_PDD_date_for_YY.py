@@ -9,7 +9,7 @@ import urllib.request
 boy_name = ""
 product_list =[]
 product_file_list =[]
-man_URL = "d:\\make_everyday_PDD_date_for_YY\\"
+man_URL = "d:\\应用\\make_everyday_PDD_date_for_YY\\"
 product_link_in_list = []#这个是所有产品信息对象的存储
 product_name_and_easy_name_list = []
 
@@ -101,6 +101,7 @@ class product_link_in:
 
 def writer_file():
     global boy_name
+    
     result_file = make_all_file()
     result_file = result_file.drop_duplicates(['订单号'])
     all_date = result_file[(result_file["售后状态"]=="无售后或售后取消")|(result_file["售后状态"]=="售后处理中")]
