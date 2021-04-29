@@ -32,7 +32,7 @@ def return_type(x,yz):
 #清洗商家备注
 def return_remark(y):
     #抹去的字符串 
-    apk = ["V","v","G","g","_","-","申通","韵达","邮政","顺丰","圆通"]
+    apk = ["V","v","G","g","_","-","申通","韵达","邮政","顺丰","圆通","'null","极兔"]
     try:  
         for a in apk:
             y = y.replace(a,'')
@@ -79,6 +79,14 @@ def kaiguan():
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~华丽的分割线~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+#读取产品数据表格做三个映射
+def read_product_excle():
+    xl = pd.read_excel(""+man_URL+"产品数据表格.xlsx",sheet_name="数据")
+    x_Pname = xl[["姓名","姓名代码"]].dropna(axis=0,how='all')
+    x_product_name = xl[["产品名称","产品简称"]].dropna(axis=0,how='all')
+    x_shop_name = xl[["淘宝特价版店铺","特价版对应小组"]].dropna(axis=0,how='all')
+    return [x_Pname,x_product_name,x_shop_name]
+
 #读取读取并且合并多个管家婆下载的文件
 def add_GJP_file_for_code():
     global shell_car_data
@@ -93,7 +101,6 @@ def add_GJP_file_for_code():
     shell_car_data = pd.concat(gjp_list)
     shell_car_data = shell_car_data[["套餐名称","套餐编码"]]
     return shell_car_data
-
 
 #这个 方法主要就是并且把产品编码和sku名称拿出来予以对应返
 def get_sku_name_from_code(code):
@@ -135,6 +142,7 @@ def get_shell_data():
     #返回数据
     return shell_data
 
+#生成数据
 def make_data():
     #载入数据
     shell_data = get_shell_data()
@@ -170,10 +178,35 @@ def make_data():
     shell_data['套餐数量'] = shell_data.套餐名称.apply(return_product1)
     shell_data['套餐单位'] = shell_data.套餐名称.apply(return_product2)
     shell_data['套餐数量'] =  shell_data['套餐数量'].astype("int")
+
+    #映射几个数据
+
+    xpd = read_product_excle()
+    x_Pname = xpd[0]
+    x_product_name = xpd[1]
+    x_shop_name = xpd[2]
+
+    #翻译姓名代码如果没有找到就返回原来的值
+    def easy_name_to_name(name1,name2):
+        #print("name1:"+str(name1)+"name2:"+str(name2)+"")
+        if(pd.isnull(name2)):#判断姓名里边是否有数据
+            return name1
+        else:
+            return name2
+
+    shell_data = pd.merge(shell_data, x_Pname, how='left', left_on='商家备忘2', right_on='姓名代码')
+    shell_data['商家备忘3'] = shell_data.apply(lambda row: easy_name_to_name(row['商家备忘2'], row['姓名']),axis=1)
+    shell_data = pd.merge(shell_data, x_product_name, how='left', left_on='套餐名', right_on='产品简称')
+    shell_data = pd.merge(shell_data, x_shop_name, how='left', left_on='店铺名称', right_on='淘宝特价版店铺')
+
+
+
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~华丽的分割线~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     #生成数据部分
     #生成店铺统计销量
-    df1 = shell_data.pivot_table(index=["店铺名称","type"],values="买家实际支付金额",aggfunc = 'sum')
+    shell_data.to_csv(""+man_URL+"all.csv",encoding="utf-8-sig")#生成原始数据方便差错纠错
+
+    df1 = shell_data.pivot_table(index=["特价版对应小组","店铺名称","type"],values="买家实际支付金额",aggfunc = 'sum')
     
     #生成没有备注的店铺和订单
     df2 = shell_data[(shell_data["商家备忘"].isnull())|(shell_data["商家备忘"]=="null")]
@@ -182,9 +215,8 @@ def make_data():
     df2 = df2[["店铺名称","订单编号","商家备忘"]]
 
     #根据每个人每个店每产品统计销售额
-    df3 = shell_data.pivot_table(index=["店铺名称","商家备忘2","套餐名","type"],values = ["买家实际支付金额","套餐数量"],aggfunc = 'sum')
+    df3 = shell_data.pivot_table(index=["特价版对应小组","店铺名称","商家备忘3","产品名称","type"],values = ["买家实际支付金额","套餐数量"],aggfunc = 'sum')
 
-    shell_data.to_csv(""+man_URL+"all.csv",encoding="utf-8-sig")
     #外加 ~~~看看能不能统计出销售单品的数量
     with pd.ExcelWriter(r''+man_URL+'result.xlsx') as writer:
         df1.to_excel(writer, sheet_name='每个店铺销售数据',merge_cells=False)
@@ -199,5 +231,6 @@ if __name__ == "__main__":
     if(kaiguan()):
         print("访问正常")
         make_data()
+        #read_product_excle()
     else:
         print("无法获取配置文件")
