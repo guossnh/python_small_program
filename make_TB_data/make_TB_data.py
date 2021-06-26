@@ -10,7 +10,7 @@ import urllib.request
 man_URL = "d:\\应用\\make_TB_data\\"
 shell_car_data = ""
 
- 
+
 #这个方法调用之后返回住文件夹下边的file文件夹里边的相同后缀名的文件的list
 def get_file_name_list(last_name):
     return glob.glob(r''+man_URL+'file\\*.'+last_name+'')
@@ -86,7 +86,7 @@ def read_product_excle():
     x_product_name = xl[["产品名称","产品简称"]].dropna(axis=0,how='all')
     x_shop_name = xl[["淘宝特价版店铺","特价版对应小组"]].dropna(axis=0,how='all')
     return [x_Pname,x_product_name,x_shop_name]
-
+ 
 #读取读取并且合并多个管家婆下载的文件
 def add_GJP_file_for_code():
     global shell_car_data
