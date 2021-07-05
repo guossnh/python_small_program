@@ -124,11 +124,14 @@ def make_data():
     def ename_to_name(z):
         for inx , x in enumerate(easy_list):
          if(x in z):
+             #print("正确这边是x："+x+"这边是x："+z+"")
              return namelist[inx]
+        return "备注没有找到名字"
     def ename_to_group(v):
         for inx , x in enumerate(easy_list):
          if(x in v):
              return zlist[inx]
+        return "备注没有找到组"
     shell_data['姓名'] = shell_data.订单备注2.apply(ename_to_name)
     shell_data['组'] = shell_data.订单备注2.apply(ename_to_group)
 
@@ -136,19 +139,19 @@ def make_data():
     shell_data = shell_data.dropna(subset=["操作人"])
 
     #筛选出真实订单
-    shell_data = shell_data[(shell_data["type"]=="真实")]
+    #shell_data = shell_data[(shell_data["type"]=="真实")]
    
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~华丽的分割线~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     #生成数据部分
     #生成店铺统计销量
     shell_data.to_csv(""+man_URL+"all.csv",encoding="utf-8-sig")#生成原始数据方便差错纠错
-
-    df1 = shell_data.pivot_table(index=["店铺名称"],values="买家实际支付金额",aggfunc = 'sum')
     
+    #生成对应店铺数据
+    df1 = shell_data.pivot_table(index=["店铺名称"],values=["买家实际支付金额"],columns= ["type"],aggfunc = 'sum',fill_value=0,margins=1)
+
     #生成各组数据
     df2 = shell_data.pivot_table(index=["组"],values="买家实际支付金额",aggfunc = 'sum')
-
 
     #根据每个人每个店每产品统计销售额
     df3 = shell_data.pivot_table(index=["组","店铺名称","姓名","商品名称"],values = ["买家实际支付金额"],aggfunc = 'sum')
