@@ -101,6 +101,9 @@ def make_data():
     #print(os.name) 这个地方先不要写了注意先要实现功能
     pdd_data = get_file_pdd()
     mdd_data = get_file_mdd()
+    #清理重复数据
+    mdd_data = mdd_data.drop_duplicates("平台订单号")
+
     shell_data = pd.merge(pdd_data, mdd_data, how='left', left_on='订单编号', right_on='平台订单号')
 
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~华丽的分割线~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -136,7 +139,7 @@ def make_data():
     shell_data['组'] = shell_data.订单备注2.apply(ename_to_group)
 
     #筛选出没有订单的信息
-    shell_data = shell_data.dropna(subset=["操作人"])
+    #shell_data = shell_data.dropna(subset=["操作人"])
 
     #筛选出真实订单
     #shell_data = shell_data[(shell_data["type"]=="真实")]
@@ -163,7 +166,7 @@ def make_data():
         df2.to_excel(writer, sheet_name='每个组销售数据',merge_cells=False)
 
         df3.to_excel(writer, sheet_name='每人每店每产品销售数据',merge_cells=False)
-   
+
 
 
 if __name__ == "__main__":
