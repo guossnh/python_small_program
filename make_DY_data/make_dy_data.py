@@ -36,17 +36,41 @@ def get_file_folder():
 #判断系统版本然后修改对应的工作路径
 def find_version_of_OS():
     sysstr = platform.system()
+    global man_URL,shuangxiegang
     if(sysstr =="Windows"):
         get_file_folder()
-    elif(sysstr == "Linux"):
-        print ("Call Linux tasks")
+    elif(sysstr == "Darwin"):
+        man_URL = "/Users/tlkzhuo/tlk/git/make_dy_data/"
     else:
         print ("Other System tasks")
 
-
+#根据系统版本生成相应的路径符号
+def return_symbol():
+    sysstr = platform.system()
+    if(sysstr =="Windows"):
+        return "\\"
+    elif(sysstr == "Darwin"):
+        return "/"
+    else:
+        return "出错了"
+#读取抖音文件并且返回
+def  read_shell_file():
+    product_file_list =[]
+    def get_file_name_list():
+        return glob.glob(r''+man_URL+'file'+return_symbol()+'*.csv')
+        print("读取"+str(len(product_file_list))+"个销量数据文件")
+ 
+    #放入list
+    for product_file in get_file_name_list():
+        try:
+            product_file_list.append(pd.read_csv(product_file))
+        except:
+            print("数据文件"+product_file+"出现错误")
+    #返回合并
+    return pd.concat(product_file_list)
 
 def make_data():
-    pass
+    print(read_shell_file())
 
 
 
@@ -55,7 +79,7 @@ if __name__ == "__main__":
         print("访问正常")
         #开始判断修改操作区路径
         find_version_of_OS()
-          
+        print(man_URL)
 
 
 
