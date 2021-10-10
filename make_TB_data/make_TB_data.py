@@ -132,12 +132,12 @@ def get_shell_data():
     shell_data2 = pd.concat(shell_data2)
     #转换需要的数据格式并且去除特殊字符
     shell_data["订单编号"] = shell_data["订单编号"].astype(str)
-    shell_data2["订单编号"] = shell_data2["订单编号"].map(lambda x: str(x).lstrip('=').rstrip('=')).astype(str)
-    shell_data2["订单编号"] = shell_data2["订单编号"].map(lambda x: str(x).lstrip('"').rstrip('"')).astype(str)
+    shell_data2["主订单编号"] = shell_data2["主订单编号"].map(lambda x: str(x).lstrip('=').rstrip('=')).astype(str)
+    shell_data2["主订单编号"] = shell_data2["主订单编号"].map(lambda x: str(x).lstrip('"').rstrip('"')).astype(str)
     #清楚宝贝表的重复数据
-    shell_data2 = shell_data2.drop_duplicates("订单编号")
+    shell_data2 = shell_data2.drop_duplicates("主订单编号")
     #合并数据表和宝贝表
-    shell_data = pd.merge(shell_data, shell_data2, how='left', on='订单编号')
+    shell_data = pd.merge(shell_data, shell_data2, how='left', left_on='订单编号',right_on='主订单编号')
     #print(shell_data[shell_data["买家会员名"]=="走俏宝贝"])
     #返回数据
     return shell_data
