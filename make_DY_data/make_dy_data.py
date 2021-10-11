@@ -7,7 +7,7 @@ import pandas as pd
 import glob,os,openpyxl,re,platform
 import urllib.request  
 
-man_URL = "d:\\应用\\make_TB_data\\"
+man_URL = "d:\\应用\\make_dy_data\\"
 shell_car_data = ""
 
 #这个方法调用之后返回住文件夹下边的file文件夹里边的相同后缀名的文件的list
@@ -58,7 +58,7 @@ def  read_shell_file():
     product_file_list =[]
     def get_file_name_list():
         return glob.glob(r''+man_URL+'file'+return_symbol()+'*.csv')
-        print("读取"+str(len(product_file_list))+"个销量数据文件")
+        #print("读取"+str(len(product_file_list))+"个销量数据文件")
  
     #放入list
     for product_file in get_file_name_list():
@@ -68,6 +68,22 @@ def  read_shell_file():
             print("数据文件"+product_file+"出现错误")
     #返回合并
     return pd.concat(product_file_list)
+
+#读取读取并且合并多个管家婆下载的文件
+def add_GJP_file_for_code():
+    global shell_car_data
+    print("开始读取管家婆数据")
+    xl_list = get_file_name_list("xls")
+    gjp_list = []
+    for x in xl_list:
+        try:
+            gjp_list.append(pd.read_excel(x,skiprows=11))
+        except:
+            print("读取管家婆文件"+x+"出现错误")
+    shell_car_data = pd.concat(gjp_list)
+    shell_car_data = shell_car_data[["套餐名称","套餐编码"]]
+    return shell_car_data
+
 
 def make_data():
     print(read_shell_file())
