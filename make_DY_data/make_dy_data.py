@@ -67,7 +67,8 @@ def  read_shell_file():
         except:
             print("数据文件"+product_file+"出现错误")
     #返回合并
-    return pd.concat(product_file_list)
+    shell_data = pd.concat(product_file_list)
+    return shell_data[["主订单编号","子订单编号","商品数量","商品ID","商家编码","订单应付金额","订单提交时间","订单完成时间","支付完成时间","订单状态","售后状态","商家备注","旗帜颜色"]]
 
 #读取读取并且合并多个管家婆下载的文件
 def add_GJP_file_for_code():
@@ -84,10 +85,27 @@ def add_GJP_file_for_code():
     shell_car_data = shell_car_data[["套餐名称","套餐编码"]]
     return shell_car_data
 
-
+#这块就是处理数据
 def make_data():
-    print(read_shell_file())
+    shell_data = read_shell_file()#获取销量数据的pd对象
+    shell_data['商家编码'] = shell_data['商家编码'].str.strip()
 
+    gjpd_ata = add_GJP_file_for_code()#获取管家婆数据的pd对象
+    #用销量表链接管家婆数据表格
+    shell_data = pd.merge(shell_data, gjpd_ata, how='left', left_on='商家编码', right_on='套餐编码')
+
+    #筛选表格订单状态和售后状态
+    shell_data = shell_data[(shell_data["订单状态"]=="已完成")|(shell_data["售后状态"]=="已发货")|(shell_data["售后状态"]=="备货中")]
+    shell_data = shell_data[(shell_data["售后状态"]=="-")|(shell_data["售后状态"]=="售后关闭")]
+
+    #这块需要根据套餐名称拆分多个订单
+    #首先标记多个订单的状态
+    shell_data['套餐名称type'] = shell_data[(shell_data["套餐名称"].str.contains("+"))]
+
+
+
+    #输出全文件，用来检查问题
+    shell_data.to_csv(""+man_URL+"all.csv",encoding="utf-8-sig")#生成原始数据方便差错纠错
 
 
 if __name__ == "__main__":
@@ -96,10 +114,6 @@ if __name__ == "__main__":
         #开始判断修改操作区路径
         find_version_of_OS()
         print(man_URL)
-
-
-
         make_data()
-
     else:
         print("无法获取配置文件")
