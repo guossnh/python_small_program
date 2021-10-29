@@ -117,6 +117,42 @@ def return_type(x):
         return "真实"
 
 
+#读取姓名组ID数据并且返回数据文件
+def read_name_data():
+    global man_URL,product_ename_and_aname
+    xl = pd.read_excel(""+man_URL+"dy产品数据表格.xlsx",None)
+    xl_list =[]
+    for x in xl.keys():
+        xl = pd.read_excel(""+man_URL+"产品数据表格.xlsx",x)#读取文件
+
+        if(x.find("组")!= -1):
+            xl['产品ID'] = pd.to_numeric(xl['产品ID'], errors='coerce')#将产品ID转化为数字格式
+
+            #开始清理数据
+            xl = xl.loc[:,["店铺","姓名","产品ID"]]#只保留有需要的四列
+            xl = xl.dropna(subset=['产品ID']) #删除确实ID的行
+            xl = xl.dropna(axis=0,how='all') #删除为NaN的行
+
+            xl.insert(xl.shape[1], '组', x)#将组名插入到数据里边
+
+            xl_list.append(xl)#将所有的组数据放入list
+        #暂时不需要数据类型转换就先注释掉这一块
+        #elif(x.find("数据")!= -1):
+        #    for row in xl.itertuples():
+        #        product_ename_and_aname[getattr(row, '产品简称')] = getattr(row, '产品名称')#载入全称简称转换字典数据
+                #如果需要增加转化数据的话可以放在这里
+    df = pd.concat(xl_list)
+    #清理重复ID部分
+    same_id_num = int(df[df.duplicated('产品ID')].count()["产品ID"])#获取重复数量
+    if(same_id_num>0):
+        print("发现重复记录"+str(same_id_num)+"条")
+        print("导出重复记录到默认路径"+day_time("today")+"重复.csv")
+        df[df.duplicated('产品ID')].to_csv(""+man_URL+day_time("today")+"重复.csv")
+        return df.drop_duplicates("产品ID")
+    else:
+        print("没有发现重复的ID")
+        return df
+
 
 #这块就是处理数据
 def make_data():
@@ -146,6 +182,11 @@ def make_data():
     #这块是要判断订单类型
     shell_data['type'] = shell_data.商家备注.apply(return_type)
 
+    #获取姓名数据表
+    name_data = read_name_data()
+
+    #用姓名表格链接 产品表格然后就可以了
+    shell_data = pd.merge(shell_data, name_data, how='left', left_on='商品ID', right_on='产品ID')
 
 
     #输出全文件，用来检查问题
