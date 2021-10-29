@@ -85,6 +85,39 @@ def add_GJP_file_for_code():
     shell_car_data = shell_car_data[["套餐名称","套餐编码"]]
     return shell_car_data
 
+#这是几个拆分套餐名称的对应方法，
+def return_combo_name(y):
+    try:
+        return y.split("+")[0]
+    except:
+        return y
+def return_product0(z):
+    try:
+        z = re.split(r'(\d+)',z)[0]
+        return z
+    except:
+        return "后台没写套餐编码"
+def return_product1(z):
+    try:
+        z = re.split(r'(\d+)',z)[1]
+        return z
+    except:
+        return 1
+
+#订单类型判断
+def return_type(x):
+    try:
+        if((x.find('V-')!= -1)|(x.find('v-')!= -1)|(x.find('V_')!= -1)|(x.find('v_')!= -1)):
+            return "放单"
+        elif((x.find('G-')!= -1)|(x.find('g-')!=-1)|(x.find('G_')!= -1)|(x.find('g_')!=-1)):
+            return "刷单"
+        else:
+            return "真实"
+    except:
+        return "真实"
+
+
+
 #这块就是处理数据
 def make_data():
     shell_data = read_shell_file()#获取销量数据的pd对象
@@ -99,8 +132,19 @@ def make_data():
     shell_data = shell_data[(shell_data["售后状态"]=="-")|(shell_data["售后状态"]=="售后关闭")]
 
     #这块需要根据套餐名称拆分多个订单
-    #首先标记多个订单的状态
-    shell_data['套餐名称type'] = shell_data[(shell_data["套餐名称"].str.contains("+"))]
+    #首先标记多个订单的状态~~~这块不写了说不用
+    #shell_data['套餐名称type'] = shell_data[(shell_data["套餐名称"].str.contains("+"))]
+
+    #根据套餐名称拆分产品数量单位三个要素需要先筛选加号的信息
+    #首先先要过滤加号 然后拆分产品
+    shell_data['套餐名_去除合并产品'] = shell_data.套餐名称.apply(return_combo_name)
+    shell_data['产品名字'] = shell_data.套餐名_去除合并产品.apply(return_product0)
+    shell_data['产品数量'] = shell_data.套餐名_去除合并产品.apply(return_product1)
+    #产品数量更换数据类型
+    shell_data['产品数量'] =  shell_data['产品数量'].astype("int")
+    
+    #这块是要判断订单类型
+    shell_data['type'] = shell_data.商家备注.apply(return_type)
 
 
 
