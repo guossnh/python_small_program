@@ -4,11 +4,29 @@
 #计算抖音店铺销量的程序
 
 import pandas as pd
-import glob,os,openpyxl,re,platform
+import glob,os,openpyxl,re,platform,datetime
 import urllib.request  
 
 man_URL = "d:\\应用\\make_dy_data\\"
 shell_car_data = ""
+
+
+#获取时间比较多就放在一块了
+def day_time(day):
+    today_time = datetime.datetime.now()
+    today_time = today_time.strftime('%Y%m%d')
+    yes_time = datetime.datetime.now() + datetime.timedelta(days=-1)
+    yes_time = yes_time.strftime('%Y%m%d')
+    if(day=="today"):
+        return today_time 
+    elif(day=="yestday"):
+        return yes_time
+    else:
+        return False
+
+#将传入的ID前边添加空格
+def str_add_space(pID):
+    return " "+str(pID)
 
 #这个方法调用之后返回住文件夹下边的file文件夹里边的相同后缀名的文件的list
 def get_file_name_list(last_name):
@@ -105,7 +123,9 @@ def return_product1(z):
         return 1
 
 #订单类型判断
-def return_type(x):
+def return_type(x,y):
+    if(y==1):
+        return "活动"
     try:
         if((x.find('V-')!= -1)|(x.find('v-')!= -1)|(x.find('V_')!= -1)|(x.find('v_')!= -1)):
             return "放单"
@@ -123,23 +143,24 @@ def read_name_data():
     xl = pd.read_excel(""+man_URL+"dy产品数据表格.xlsx",None)
     xl_list =[]
     for x in xl.keys():
-        xl = pd.read_excel(""+man_URL+"产品数据表格.xlsx",x)#读取文件
+        xl = pd.read_excel(""+man_URL+"dy产品数据表格.xlsx",x)#读取文件
 
         if(x.find("组")!= -1):
-            xl['产品ID'] = pd.to_numeric(xl['产品ID'], errors='coerce')#将产品ID转化为数字格式
+            #xl['产品ID'] = pd.to_numeric(xl['产品ID'], errors='coerce')#将产品ID转化为数字格式
 
             #开始清理数据
             xl = xl.loc[:,["店铺","姓名","产品ID"]]#只保留有需要的四列
-            xl = xl.dropna(subset=['产品ID']) #删除确实ID的行
+            xl = xl.dropna(subset=['产品ID']) #删除缺失ID的行
             xl = xl.dropna(axis=0,how='all') #删除为NaN的行
 
             xl.insert(xl.shape[1], '组', x)#将组名插入到数据里边
 
             xl_list.append(xl)#将所有的组数据放入list
         #暂时不需要数据类型转换就先注释掉这一块
-        #elif(x.find("数据")!= -1):
-        #    for row in xl.itertuples():
-        #        product_ename_and_aname[getattr(row, '产品简称')] = getattr(row, '产品名称')#载入全称简称转换字典数据
+        elif(x.find("数据")!= -1):
+            for row in xl.itertuples():
+                pass
+                #product_ename_and_aname[getattr(row, '产品简称')] = getattr(row, '产品名称')#载入全称简称转换字典数据
                 #如果需要增加转化数据的话可以放在这里
     df = pd.concat(xl_list)
     #清理重复ID部分
@@ -147,26 +168,29 @@ def read_name_data():
     if(same_id_num>0):
         print("发现重复记录"+str(same_id_num)+"条")
         print("导出重复记录到默认路径"+day_time("today")+"重复.csv")
-        df[df.duplicated('产品ID')].to_csv(""+man_URL+day_time("today")+"重复.csv")
+        df[df.duplicated('产品ID')].to_csv(""+man_URL+day_time("today")+"重复.csv",index=None)
         return df.drop_duplicates("产品ID")
     else:
         print("没有发现重复的ID")
         return df
 
 
+def write_data(pd):
+    pass
+
 #这块就是处理数据
 def make_data():
     shell_data = read_shell_file()#获取销量数据的pd对象
     shell_data['商家编码'] = shell_data['商家编码'].str.strip()
-
+    
     gjpd_ata = add_GJP_file_for_code()#获取管家婆数据的pd对象
     #用销量表链接管家婆数据表格
     shell_data = pd.merge(shell_data, gjpd_ata, how='left', left_on='商家编码', right_on='套餐编码')
-
+    
     #筛选表格订单状态和售后状态
-    shell_data = shell_data[(shell_data["订单状态"]=="已完成")|(shell_data["售后状态"]=="已发货")|(shell_data["售后状态"]=="备货中")]
+    shell_data = shell_data[(shell_data["订单状态"]=="已完成")|(shell_data["订单状态"]=="已发货")|(shell_data["订单状态"]=="备货中")]
     shell_data = shell_data[(shell_data["售后状态"]=="-")|(shell_data["售后状态"]=="售后关闭")]
-
+    
     #这块需要根据套餐名称拆分多个订单
     #首先标记多个订单的状态~~~这块不写了说不用
     #shell_data['套餐名称type'] = shell_data[(shell_data["套餐名称"].str.contains("+"))]
@@ -180,13 +204,20 @@ def make_data():
     shell_data['产品数量'] =  shell_data['产品数量'].astype("int")
     
     #这块是要判断订单类型
-    shell_data['type'] = shell_data.商家备注.apply(return_type)
+    shell_data['type'] = shell_data.apply(lambda row: return_type(row['商家备注'], row['订单应付金额']),axis=1)
 
     #获取姓名数据表
     name_data = read_name_data()
 
+    #清理数据商品ID前边的空格
+    shell_data['商品ID'] = shell_data['商品ID'].astype(str).str.replace(' ', '')
+    #反向清理数据产品ID前边加空格
+    #name_data['产品ID_加空格'] = name_data.产品ID.apply(str_add_space)
+
     #用姓名表格链接 产品表格然后就可以了
     shell_data = pd.merge(shell_data, name_data, how='left', left_on='商品ID', right_on='产品ID')
+
+
 
 
     #输出全文件，用来检查问题
