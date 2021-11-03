@@ -175,8 +175,17 @@ def read_name_data():
         return df
 
 
-def write_data(pd):
-    pass
+def write_data(pdata):
+
+    df1 = pdata.pivot_table(index=["组","店铺","type"],values="订单应付金额",aggfunc = 'sum')
+    
+    #根据每个人每个店每产品统计销售额
+    df3 = pdata.pivot_table(index=["组","店铺","产品名字","type"],values = ["订单应付金额","产品发货量","有效订单量"],aggfunc = 'sum')
+
+    #外加 ~~~看看能不能统计出销售单品的数量
+    with pd.ExcelWriter(r''+man_URL+'result.xlsx') as writer:
+        df1.to_excel(writer, sheet_name='组数据',merge_cells=False)
+        df3.to_excel(writer, sheet_name='详细数据',merge_cells=False)
 
 #这块就是处理数据
 def make_data():
@@ -217,7 +226,21 @@ def make_data():
     #用姓名表格链接 产品表格然后就可以了
     shell_data = pd.merge(shell_data, name_data, how='left', left_on='商品ID', right_on='产品ID')
 
+    # 要处理链接过来表格的空值问题一列一列处理吧
+    shell_data['产品ID'].fillna(value= "找不到ID",inplace=True)
+    shell_data['店铺'].fillna(value= "找不到ID",inplace=True)
+    shell_data['姓名'].fillna(value= "找不到ID",inplace=True)
+    shell_data['组'].fillna(value= "找不到ID",inplace=True)
 
+
+    #调整数据
+    #增加发货数量 设置数值为1
+    shell_data["有效订单量"] = 1
+
+    #设置商品数量和产品数量相乘
+    shell_data["产品发货量"] = shell_data.apply(lambda x: x["产品数量"]*x["商品数量"],axis=1)
+    #调用输出  输出结果文件
+    write_data(shell_data)
 
 
     #输出全文件，用来检查问题
