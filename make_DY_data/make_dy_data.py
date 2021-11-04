@@ -9,7 +9,8 @@ import urllib.request
 
 man_URL = "d:\\应用\\make_dy_data\\"
 shell_car_data = ""
-
+#名称和简称的数据
+product_ename_and_aname = ""
 
 #获取时间比较多就放在一块了
 def day_time(day):
@@ -158,10 +159,11 @@ def read_name_data():
             xl_list.append(xl)#将所有的组数据放入list
         #暂时不需要数据类型转换就先注释掉这一块
         elif(x.find("数据")!= -1):
-            for row in xl.itertuples():
-                pass
-                #product_ename_and_aname[getattr(row, '产品简称')] = getattr(row, '产品名称')#载入全称简称转换字典数据
-                #如果需要增加转化数据的话可以放在这里
+            #for row in xl.itertuples():
+            #    product_ename_and_aname[getattr(row, '产品简称')] = getattr(row, '产品名称')#载入全称简称转换字典数据
+            #    #如果需要增加转化数据的话可以放在这里
+            xl = xl.loc[:,["产品名称","产品简称"]]#只保留有需要的2列
+            product_ename_and_aname = xl
     df = pd.concat(xl_list)
     #清理重复ID部分
     same_id_num = int(df[df.duplicated('产品ID')].count()["产品ID"])#获取重复数量
@@ -180,7 +182,7 @@ def write_data(pdata):
     df1 = pdata.pivot_table(index=["组","店铺","type"],values="订单应付金额",aggfunc = 'sum')
     
     #根据每个人每个店每产品统计销售额
-    df3 = pdata.pivot_table(index=["组","店铺","产品名字","姓名"],columns= ["type"],values = ["订单应付金额","产品发货量","有效订单量"],aggfunc = 'sum',fill_value=0,margins=1)
+    df3 = pdata.pivot_table(index=["组","店铺","产品名称","姓名"],columns= ["type"],values = ["订单应付金额","产品发货量","有效订单量"],aggfunc = 'sum',fill_value=0,margins=1)
 
     #外加 ~~~看看能不能统计出销售单品的数量
     with pd.ExcelWriter(r''+man_URL+'result.xlsx') as writer:
@@ -189,10 +191,14 @@ def write_data(pdata):
 
 #这块就是处理数据
 def make_data():
+    global product_ename_and_aname
     shell_data = read_shell_file()#获取销量数据的pd对象
     shell_data['商家编码'] = shell_data['商家编码'].str.strip()
     
     gjpd_ata = add_GJP_file_for_code()#获取管家婆数据的pd对象
+
+    #首先清理管家婆数据再合并表格
+    gjpd_ata = gjpd_ata.drop_duplicates("套餐编码")
     #用销量表链接管家婆数据表格
     shell_data = pd.merge(shell_data, gjpd_ata, how='left', left_on='商家编码', right_on='套餐编码')
     
@@ -219,10 +225,14 @@ def make_data():
     name_data = read_name_data()
 
     #清理数据商品ID前边的空格
-    shell_data['商品ID'] = shell_data['商品ID'].astype(str).str.replace(' ', '')
+    shell_data['商品ID'] = shell_data['商品ID'].astype(str).str.replace( r'^\d','')
+    name_data['产品ID'] = name_data['产品ID'].astype(str).str.replace( r'^\d','')
     #反向清理数据产品ID前边加空格
     #name_data['产品ID_加空格'] = name_data.产品ID.apply(str_add_space)
 
+
+    #先清理姓名表重复数据再合并
+    name_data = name_data.drop_duplicates("产品ID")
     #用姓名表格链接 产品表格然后就可以了
     shell_data = pd.merge(shell_data, name_data, how='left', left_on='商品ID', right_on='产品ID')
 
@@ -239,6 +249,15 @@ def make_data():
 
     #设置商品数量和产品数量相乘
     shell_data["产品发货量"] = shell_data.apply(lambda x: x["产品数量"]*x["商品数量"],axis=1)
+
+
+    #先清理产品全称简称对应表格数据
+    product_ename_and_aname = product_ename_and_aname.drop_duplicates("产品简称")
+    #这里需要产品名字和产品简称的对应一下
+    shell_data = pd.merge(shell_data, product_ename_and_aname, how='left', left_on='产品名字', right_on='产品简称',left_index=True)
+    #补充空值
+    shell_data['产品名称'].fillna(value= "找对应产品简称",inplace=True)
+
     #调用输出  输出结果文件
     write_data(shell_data)
 

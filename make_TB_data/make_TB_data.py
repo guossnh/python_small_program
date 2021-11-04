@@ -159,11 +159,10 @@ def make_data():
     #链接管家婆表格
     shell_data = pd.merge(shell_data, gjp_data, how='left', left_on='商家编码2', right_on='套餐编码')
 
-
     #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~华丽的分割线~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     #数据处理部分
     #根据备注生成销售类型·数据
-    shell_data['type'] = shell_data.apply(lambda row: return_type(row['商家备忘'], row['买家实际支付金额']),axis=1)
+    shell_data['type'] = shell_data.apply(lambda row: return_type(row['商家备忘'], row['买家实际支付金额_x']),axis=1)
     #根据销售金额判断是不是1元够
     #shell_data['type2'] = shell_data.买家实际支付金额.apply(return_type2)
 
@@ -206,7 +205,7 @@ def make_data():
     #生成店铺统计销量
     shell_data.to_csv(""+man_URL+"all.csv",encoding="utf-8-sig")#生成原始数据方便差错纠错
 
-    df1 = shell_data.pivot_table(index=["特价版对应小组","店铺名称","type"],values="买家实际支付金额",aggfunc = 'sum')
+    df1 = shell_data.pivot_table(index=["特价版对应小组","店铺名称","type"],values="买家实际支付金额_x",aggfunc = 'sum')
     
     #生成没有备注的店铺和订单
     df2 = shell_data[(shell_data["商家备忘"].isnull())|(shell_data["商家备忘"]=="null")]
@@ -215,7 +214,7 @@ def make_data():
     df2 = df2[["店铺名称","订单编号","商家备忘"]]
 
     #根据每个人每个店每产品统计销售额
-    df3 = shell_data.pivot_table(index=["特价版对应小组","店铺名称","商家备忘3","产品名称","type"],values = ["买家实际支付金额","套餐数量"],aggfunc = 'sum')
+    df3 = shell_data.pivot_table(index=["特价版对应小组","店铺名称","商家备忘3","产品名称","type"],values = ["买家实际支付金额_x","套餐数量"],aggfunc = 'sum')
 
     #外加 ~~~看看能不能统计出销售单品的数量
     with pd.ExcelWriter(r''+man_URL+'result.xlsx') as writer:
