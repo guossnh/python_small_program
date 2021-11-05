@@ -225,8 +225,10 @@ def make_data():
     name_data = read_name_data()
 
     #清理数据商品ID前边的空格
-    shell_data['商品ID'] = shell_data['商品ID'].astype(str).str.replace( r'^\d','')
-    name_data['产品ID'] = name_data['产品ID'].astype(str).str.replace( r'^\d','')
+    #shell_data['商品ID'] = shell_data['商品ID'].astype(str).str.replace( r'^\d','')
+    #name_data['产品ID'] = name_data['产品ID'].astype(str).str.replace( r'^\d','')
+    shell_data['商品ID'] = shell_data['商品ID'].astype(str).str.extract(r'(\d+)')
+    name_data['产品ID'] = name_data['产品ID'].astype(str).str.extract(r'(\d+)')
     #反向清理数据产品ID前边加空格
     #name_data['产品ID_加空格'] = name_data.产品ID.apply(str_add_space)
 
