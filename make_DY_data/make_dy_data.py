@@ -182,7 +182,7 @@ def write_data(pdata):
     df1 = pdata.pivot_table(index=["组","店铺","type"],values="订单应付金额",aggfunc = 'sum')
     
     #根据每个人每个店每产品统计销售额
-    df3 = pdata.pivot_table(index=["组","店铺","产品名称","姓名"],columns= ["type"],values = ["订单应付金额","产品发货量","有效订单量"],aggfunc = 'sum',fill_value=0,margins=1)
+    df3 = pdata.pivot_table(index=["组","店铺","产品名称","姓名","type"],values = ["订单应付金额","产品发货量","有效订单量"],aggfunc = 'sum',fill_value=0,margins=1)
 
     #外加 ~~~看看能不能统计出销售单品的数量
     with pd.ExcelWriter(r''+man_URL+'result.xlsx') as writer:
