@@ -10,7 +10,7 @@ import urllib.request
 boy_name = ""
 product_list =[]
 product_file_list =[]
-man_URL = "d:\\make_everyday_PDD_date_for_YY\\"
+man_URL = "d:\\应用\\ceshi3\\"
 #简称和全称的字典数据
 product_ename_and_aname = {}
 #直通车数据对象
@@ -30,7 +30,7 @@ def day_time(day):
         return yes_time
     else:
         return False
-    
+
 #这个方法是检测相同的ID的方法
 def find_same_ID(df):
     same_id_num = int(df[df.duplicated('产品ID')].count()["产品ID"])#获取重复数量
@@ -106,7 +106,22 @@ def get_car_data_to_pd():
             car_money_pd.append(pd.read_excel(x))
         except:
             print("直通车文件"+x+"出现错误")
-    shell_car_data = pd.concat(car_money_pd)
+    if(car_money_pd):
+        shell_car_data = pd.concat(car_money_pd)
+        return True
+    else:
+        return False
+
+#获取执行程序的文件夹的路径
+def get_file_folder():
+    #fielpath = os.getcwd()
+    global man_URL
+    folder_list = os.listdir(os.path.dirname(__file__))
+    if("file" in folder_list):
+        print("修改工作路径")
+        man_URL = os.path.dirname(__file__).replace("\\","\\\\")+"\\\\"
+    else:
+        print("调试路径")
 
 #通过这个方法可以查询直通车的数据
 def find_carmoney_data(productID):
@@ -118,16 +133,79 @@ def find_carmoney_data(productID):
     else:
         return 0
 
-#这块是通过各类数据开始计算结果
-def compute_result(df,shell_date):
-    #筛选需要统计的销量信息
-    shell_date = shell_date[(shell_date["售后状态"]=="无售后或售后取消")|(shell_date["售后状态"]=="售后处理中")]
-    shell_date = shell_date[(shell_date["订单状态"]=="待发货")|(shell_date["订单状态"]=="已发货，待签收")|(shell_date["订单状态"]=="已签收")]
+#读取读取并且合并多个管家婆下载的文件
+def add_GJP_file_for_code():
+    global shell_car_data
 
-    shell_date["商品id"].astype("str")
+    #读取相应文件夹下边的所有xls格式文件
+    def get_file_name_list(last_name):
+        return glob.glob(r''+man_URL+'gjp\\*.'+last_name+'')
+
+    print("开始读取管家婆数据")
+    xl_list = get_file_name_list("xls")
+    gjp_list = []
+    for x in xl_list:
+        try:
+            gjp_list.append(pd.read_excel(x,skiprows=11))
+        except:
+            print("读取管家婆文件"+x+"出现错误")
+    shell_gjp_data = pd.concat(gjp_list)
+    shell_gjp_data = shell_gjp_data[["套餐名称","套餐编码"]]
+    return shell_gjp_data
+
+#这是几个拆分套餐名称的对应方法，
+def return_combo_name(y):
+    try:
+        return y.split("+")[0]
+    except:
+        return y
+def return_product0(z):
+    try:
+        z = re.split(r'(\d+)',z)[0]
+        return z
+    except:
+        return "后台没写套餐编码"
+def return_product1(z):
+    try:
+        z = re.split(r'(\d+)',z)[1]
+        return z
+    except:
+        return 1
+
+
+
+#这块是通过各类数据开始计算结果
+def compute_result(df,shell_data):
+    global shell_car_data
+    #筛选需要统计的销量信息
+    shell_data = shell_data[(shell_data["售后状态"]=="无售后或售后取消")|(shell_data["售后状态"]=="售后处理中")]
+    shell_data = shell_data[(shell_data["订单状态"]=="待发货")|(shell_data["订单状态"]=="已发货，待签收")|(shell_data["订单状态"]=="已签收")]
+
+    #修改数据类型方便判断
+    shell_data["商品id"].astype("str")
+
+    #添加商品有效销量计数，
+    shell_data["计数"] = 1
+
+
+    #获取管家婆数据
+    gjp_data = add_GJP_file_for_code()
+    #首先清理管家婆数据再合并表格
+    gjp_data = gjp_data.drop_duplicates("套餐编码")
+    #用销量表链接管家婆数据表格
+    shell_data = pd.merge(shell_data, gjp_data, how='left', left_on='商家编码-SKU维度', right_on='套餐编码')
+
+    #根据套餐名称拆分产品数量单位三个要素需要先筛选加号的信息
+    #首先先要过滤加号 然后拆分产品
+    shell_data['套餐名_去除合并产品'] = shell_data.套餐名称.apply(return_combo_name)
+    shell_data['产品名字'] = shell_data.套餐名_去除合并产品.apply(return_product0)
+    shell_data['产品数量'] = shell_data.套餐名_去除合并产品.apply(return_product1)
+    #产品数量更换数据类型
+    shell_data['产品数量'] =  shell_data['产品数量'].astype("int")
+
     #开始计算
     #先修改名字  不修改的话带括号的名字在计算的时候容易出错
-    shell_date = shell_date.rename(columns={'商家实收金额(元)':'商家实收金额'})
+    shell_data = shell_data.rename(columns={'商家实收金额(元)':'商家实收金额'})
     #创建一个方法用来区分单条数据是干预，真实，网站放单
     def return_type(x):
         try:
@@ -140,16 +218,21 @@ def compute_result(df,shell_date):
         except:
             return 0
     #总共销量表格加入type区分干预，真实，网站放单
-    shell_date['type'] = shell_date.商家备注.apply(return_type)
+    shell_data['type'] = shell_data.商家备注.apply(return_type)
     #在df表里边加入各种销量数据
-    v_shell_data = shell_date[shell_date['type']==1]
-    g_shell_data = shell_date[shell_date['type']==2]
-    t_shell_data = shell_date[shell_date['type']==0]
+    v_shell_data = shell_data[shell_data['type']==1]
+    g_shell_data = shell_data[shell_data['type']==2]
+    t_shell_data = shell_data[shell_data['type']==0]
     df['销量'] = df.产品ID.apply(lambda x : t_shell_data.商家实收金额.loc[t_shell_data.商品id == x].sum())
     df['干预'] = df.产品ID.apply(lambda x : g_shell_data.商家实收金额.loc[g_shell_data.商品id == x].sum())
     df['放单'] = df.产品ID.apply(lambda x : v_shell_data.商家实收金额.loc[v_shell_data.商品id == x].sum())
+    df['有效单量'] = df.产品ID.apply(lambda x : shell_data.计数.loc[shell_data.商品id == x].sum())
     #在df表里边加入直通车数据
-    df['直通车'] = df.产品ID.apply(find_carmoney_data)
+    #首先判断直通车数据是否为空
+    if(len(shell_car_data) ==0):
+        pass
+    else:
+        df['直通车'] = df.产品ID.apply(find_carmoney_data)
 
     #加入全称数据可以不显示
     df['商品全称'] = df.产品简称.apply(find_product_full_name2)
@@ -159,7 +242,8 @@ def compute_result(df,shell_date):
 #写出文件
 def write_file2(df):
     global man_URL
-    df.to_csv(""+man_URL+day_time('today')+"result.csv",index=False,encoding="utf-8-sig",columns=['店铺','产品简称','商品全称','姓名','产品ID','组','销量','干预','放单','直通车'])
+    #df.to_csv(""+man_URL+day_time('today')+"result.csv",index=False,encoding="utf-8-sig",columns=['店铺','产品简称','商品全称','姓名','产品ID','组','销量','干预','放单','直通车'])
+    df.to_csv(""+man_URL+day_time('today')+"result.csv",index=False,encoding="utf-8-sig")
 
 #根据简称检索全称并且返回
 def find_product_full_name2(easyname):
@@ -169,7 +253,7 @@ def find_product_full_name2(easyname):
     except:
         return easyname
 
-#这个是判断网络链接的方法
+#这个是判断网络链接的方法 
 def kaiguan2():
     req = urllib.request.Request('http://guossnh.com/if/if.json')
     result = urllib.request.urlopen(req).read().decode('utf-8')
@@ -180,12 +264,17 @@ def kaiguan2():
 
 #检测执行步骤到哪一步卡死了
 def content():
+    print("判断路径")
+    get_file_folder()
     print("载入配置文件")
     df = read_config_xlsx_new()
     print("开始载入销量数据")
     shell_date = get_sell_date_to_pd()
     print("载入直通车数据")
-    get_car_data_to_pd()
+    if(get_car_data_to_pd()):
+        print("直通车数据载入完毕")
+    else:
+        print("直通车数据是空不参与计算")
     print("开始计算")
     df = compute_result(df,shell_date)
     print("开始生成结果")
