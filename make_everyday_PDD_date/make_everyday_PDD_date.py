@@ -4,7 +4,7 @@
 
 import pandas as pd
 import numpy as np
-import time,os,datetime,glob,sys,csv,xlrd
+import time,os,datetime,glob,sys,csv,xlrd,re
 import urllib.request
 
 boy_name = ""
@@ -172,8 +172,6 @@ def return_product1(z):
     except:
         return 1
 
-
-
 #这块是通过各类数据开始计算结果
 def compute_result(df,shell_data):
     global shell_car_data
@@ -200,8 +198,12 @@ def compute_result(df,shell_data):
     shell_data['套餐名_去除合并产品'] = shell_data.套餐名称.apply(return_combo_name)
     shell_data['产品名字'] = shell_data.套餐名_去除合并产品.apply(return_product0)
     shell_data['产品数量'] = shell_data.套餐名_去除合并产品.apply(return_product1)
-    #产品数量更换数据类型
+    #套餐后缀产品数量更换数据类型
     shell_data['产品数量'] =  shell_data['产品数量'].astype("int")
+    #转换数据类型方便做合并
+    shell_data['商品数量(件)'] =  shell_data['商品数量(件)'].astype("int")
+
+    shell_data["产品发货数量"] = shell_data.apply(lambda x: x["产品数量"]*x["商品数量(件)"],axis=1)
 
     #开始计算
     #先修改名字  不修改的话带括号的名字在计算的时候容易出错
@@ -226,7 +228,8 @@ def compute_result(df,shell_data):
     df['销量'] = df.产品ID.apply(lambda x : t_shell_data.商家实收金额.loc[t_shell_data.商品id == x].sum())
     df['干预'] = df.产品ID.apply(lambda x : g_shell_data.商家实收金额.loc[g_shell_data.商品id == x].sum())
     df['放单'] = df.产品ID.apply(lambda x : v_shell_data.商家实收金额.loc[v_shell_data.商品id == x].sum())
-    df['有效单量'] = df.产品ID.apply(lambda x : shell_data.计数.loc[shell_data.商品id == x].sum())
+    df['订单发货数量'] = df.产品ID.apply(lambda x : shell_data.计数.loc[shell_data.商品id == x].sum())
+    df['产品发货数量'] = df.产品ID.apply(lambda x : shell_data.产品发货数量.loc[shell_data.商品id == x].sum())
     #在df表里边加入直通车数据
     #首先判断直通车数据是否为空
     if(len(shell_car_data) ==0):
@@ -242,6 +245,8 @@ def compute_result(df,shell_data):
 #写出文件
 def write_file2(df):
     global man_URL
+    #调整列位置开始输出
+    df = df[["店铺","产品简称","商品全称","姓名","产品ID","组","销量","干预","放单","订单发货数量","产品发货数量"]]
     #df.to_csv(""+man_URL+day_time('today')+"result.csv",index=False,encoding="utf-8-sig",columns=['店铺','产品简称','商品全称','姓名','产品ID','组','销量','干预','放单','直通车'])
     df.to_csv(""+man_URL+day_time('today')+"result.csv",index=False,encoding="utf-8-sig")
 
