@@ -229,6 +229,9 @@ def compute_result(df,shell_data):
     df['干预'] = df.产品ID.apply(lambda x : g_shell_data.商家实收金额.loc[g_shell_data.商品id == x].sum())
     df['放单'] = df.产品ID.apply(lambda x : v_shell_data.商家实收金额.loc[v_shell_data.商品id == x].sum())
     df['订单发货数量'] = df.产品ID.apply(lambda x : shell_data.计数.loc[shell_data.商品id == x].sum())
+    #先要筛选出真实的和放单的shell_data对象
+    shell_data_v_t = shell_data[(shell_data['type']==1)|(shell_data['type']==0)]
+    df['订单发货数量（放+真）'] = df.产品ID.apply(lambda x : shell_data_v_t.计数.loc[shell_data_v_t.商品id == x].sum())
     df['产品发货数量'] = df.产品ID.apply(lambda x : shell_data.产品发货数量.loc[shell_data.商品id == x].sum())
     #在df表里边加入直通车数据
     #首先判断直通车数据是否为空
@@ -246,7 +249,7 @@ def compute_result(df,shell_data):
 def write_file2(df):
     global man_URL
     #调整列位置开始输出
-    df = df[["店铺","产品简称","商品全称","姓名","产品ID","组","销量","干预","放单","订单发货数量","产品发货数量"]]
+    df = df[["店铺","产品简称","商品全称","姓名","产品ID","组","销量","干预","放单","订单发货数量","产品发货数量","订单发货数量（放+真）"]]
     #df.to_csv(""+man_URL+day_time('today')+"result.csv",index=False,encoding="utf-8-sig",columns=['店铺','产品简称','商品全称','姓名','产品ID','组','销量','干预','放单','直通车'])
     df.to_csv(""+man_URL+day_time('today')+"result.csv",index=False,encoding="utf-8-sig")
 

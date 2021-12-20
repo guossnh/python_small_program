@@ -104,7 +104,7 @@ def writer_file():
     for one_date in read_config_xlsx():
         try:
             all_shell = all_date[(all_date["商品id"]==one_date.pid)]["商家实收金额(元)"].sum()
-            wb_make_shell = all_date[(all_date["商品id"]==one_date.pid)&((all_date["商家备注"].str.contains("V-"))| (all_date["商家备注"].str.contains("v-")))]["商家实收金额(元)"].sum()
+            wb_make_shell = all_date[(all_date["商品id"]==one_date.pid)&((all_date["商家备注"].str.contains("V-"))|(all_date["商家备注"].str.contains("v-")))]["商家实收金额(元)"].sum()
             sd_make_shell = all_date[(all_date["商品id"]==one_date.pid)&((all_date["商家备注"].str.contains("G-"))|(all_date["商家备注"].str.contains("g-")))]["商家实收金额(元)"].sum()
             one_date.wb_money = round(wb_make_shell,2)
             one_date.sd_money = round(sd_make_shell,2)
