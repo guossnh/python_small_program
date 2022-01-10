@@ -182,7 +182,7 @@ def write_data(pdata):
     df1 = pdata.pivot_table(index=["组","店铺","type"],values="订单应付金额",aggfunc = 'sum')
     
     #根据每个人每个店每产品统计销售额
-    df3 = pdata.pivot_table(index=["组","店铺","产品名称","姓名","type"],values = ["订单应付金额","产品发货量","有效订单量"],aggfunc = 'sum',fill_value=0,margins=1)
+    df3 = pdata.pivot_table(index=["组","店铺","产品名称","姓名","type"],values = ["订单应付金额","产品量","订单量"],aggfunc = 'sum',fill_value=0,margins=1)
 
     #外加 ~~~看看能不能统计出销售单品的数量
     with pd.ExcelWriter(r''+man_URL+'result.xlsx') as writer:
@@ -247,10 +247,15 @@ def make_data():
 
     #调整数据
     #增加发货数量 设置数值为1
-    shell_data["有效订单量"] = 1
+    def return_num(type):
+        if(type=="真实"|type=="放单"):
+            return 1
+        else:
+            return 0
+    shell_data["订单量"] = shell_data.apply(lambda row: return_num(row['type']),axis=1)
 
     #设置商品数量和产品数量相乘
-    shell_data["产品发货量"] = shell_data.apply(lambda x: x["产品数量"]*x["商品数量"],axis=1)
+    shell_data["产品量"] = shell_data.apply(lambda x: x["产品数量"]*x["商品数量"],axis=1)
 
 
     #先清理产品全称简称对应表格数据
