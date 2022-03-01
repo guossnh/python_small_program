@@ -7,7 +7,7 @@ import pandas as pd
 import glob,os,openpyxl,re,platform,datetime
 import urllib.request  
 
-man_URL = "d:\\应用\\make_dy_data\\"
+man_URL = "d:\\应用\\ceshi6\\"
 shell_car_data = ""
 #名称和简称的数据
 product_ename_and_aname = ""
@@ -178,7 +178,7 @@ def read_name_data():
 
 
 def write_data(pdata):
-
+    pdata["订单应付金额"] = pdata["订单应付金额"].astype("float64")
     df1 = pdata.pivot_table(index=["组","店铺","type"],values="订单应付金额",aggfunc = 'sum')
     
     #根据每个人每个店每产品统计销售额
@@ -247,12 +247,13 @@ def make_data():
 
     #调整数据
     #增加发货数量 设置数值为1
-    def return_num(type):
-        if(type=="真实"|type=="放单"):
-            return 1
-        else:
-            return 0
-    shell_data["订单量"] = shell_data.apply(lambda row: return_num(row['type']),axis=1)
+    #def return_num(type):
+    #    if(type=="真实"|type=="放单"):
+    #        return 1
+    #    else:
+    #        return 0
+    #shell_data["订单量"] = shell_data.apply(lambda row: return_num(row['type']),axis=1)
+    shell_data["订单量"] = 1
 
     #设置商品数量和产品数量相乘
     shell_data["产品量"] = shell_data.apply(lambda x: x["产品数量"]*x["商品数量"],axis=1)

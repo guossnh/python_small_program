@@ -10,7 +10,7 @@ import urllib.request
 boy_name = ""
 product_list =[]
 product_file_list =[]
-man_URL = "d:\\应用\\ceshi3\\"
+man_URL = "d:\\应用\\ceshi7\\"
 #简称和全称的字典数据
 product_ename_and_aname = {}
 #直通车数据对象
@@ -126,7 +126,7 @@ def get_file_folder():
 #通过这个方法可以查询直通车的数据
 def find_carmoney_data(productID):
     global shell_car_data
-    productID = str(productID)
+    productID = str(int(productID))
     one_resultpd = shell_car_data[(shell_car_data['推广计划'].str.find(productID, start=0, end=None)>=0)]
     if(len(one_resultpd)):
         return one_resultpd["花费(元)"].sum()
@@ -172,6 +172,17 @@ def return_product1(z):
     except:
         return 1
 
+#这块是把产品明细读取一下加入数据表
+def get_product_price_file():
+    global man_URL
+    x2 = pd.read_excel(""+man_URL+"产品明细.xlsx")
+    x2 = x2[["产品简称","成本价格"]]#只保留有需要的两列
+    x2 = x2.rename(columns={'产品简称':'产品简称2'})
+    #清理重复数据
+    x2 = x2.drop_duplicates("产品简称2")
+    return x2
+
+
 #这块是通过各类数据开始计算结果
 def compute_result(df,shell_data):
     global shell_car_data
@@ -195,6 +206,7 @@ def compute_result(df,shell_data):
 
     #根据套餐名称拆分产品数量单位三个要素需要先筛选加号的信息
     #首先先要过滤加号 然后拆分产品
+ 
     shell_data['套餐名_去除合并产品'] = shell_data.套餐名称.apply(return_combo_name)
     shell_data['产品名字'] = shell_data.套餐名_去除合并产品.apply(return_product0)
     shell_data['产品数量'] = shell_data.套餐名_去除合并产品.apply(return_product1)
@@ -233,15 +245,25 @@ def compute_result(df,shell_data):
     shell_data_v_t = shell_data[(shell_data['type']==1)|(shell_data['type']==0)]
     df['订单发货数量（放+真）'] = df.产品ID.apply(lambda x : shell_data_v_t.计数.loc[shell_data_v_t.商品id == x].sum())
     df['产品发货数量'] = df.产品ID.apply(lambda x : shell_data.产品发货数量.loc[shell_data.商品id == x].sum())
+    df['产品发货数量（放+真）'] = df.产品ID.apply(lambda x : shell_data_v_t.产品发货数量.loc[shell_data_v_t.商品id == x].sum())
     #在df表里边加入直通车数据
     #首先判断直通车数据是否为空
     if(len(shell_car_data) ==0):
-        pass
+        df['直通车'] = 0
     else:
         df['直通车'] = df.产品ID.apply(find_carmoney_data)
 
     #加入全称数据可以不显示
     df['商品全称'] = df.产品简称.apply(find_product_full_name2)
+
+    #通过产品简称对应一下产品进货价格
+    get_product_price_df = get_product_price_file()
+    
+    #链接两个df（通过产品简称加入价格选项）
+    df = pd.merge(df, get_product_price_df, how='left', left_on='产品简称', right_on='产品简称2')
+
+    #生成新的列
+    df["成本价格*产品发货数量（放+真）"] = df["成本价格"] * df["产品发货数量（放+真）"]
 
     return df
 
@@ -249,7 +271,7 @@ def compute_result(df,shell_data):
 def write_file2(df):
     global man_URL
     #调整列位置开始输出
-    df = df[["店铺","产品简称","商品全称","姓名","产品ID","组","销量","干预","放单","订单发货数量","产品发货数量","订单发货数量（放+真）"]]
+    df = df[["店铺","产品简称","商品全称","姓名","产品ID","组","直通车","销量","干预","放单","订单发货数量","产品发货数量（放+真）","订单发货数量（放+真）","成本价格*产品发货数量（放+真）"]]
     #df.to_csv(""+man_URL+day_time('today')+"result.csv",index=False,encoding="utf-8-sig",columns=['店铺','产品简称','商品全称','姓名','产品ID','组','销量','干预','放单','直通车'])
     df.to_csv(""+man_URL+day_time('today')+"result.csv",index=False,encoding="utf-8-sig")
 
@@ -294,3 +316,4 @@ def content():
 #主函数
 if __name__ == "__main__":
     content()
+    
