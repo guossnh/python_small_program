@@ -9,7 +9,7 @@ import urllib.request
 boy_name = ""
 product_list =[]
 product_file_list =[]
-man_URL = "d:\\应用\\make_everyday_PDD_date_for_YY\\"
+man_URL = "d:\\应用\\ceshi10\\"
 product_link_in_list = []#这个是所有产品信息对象的存储
 product_name_and_easy_name_list = []
 
@@ -41,6 +41,7 @@ def get_money_car(productID):
     try:
         car_money_file_list = glob.glob(r''+man_URL+'file\\*.xls')
         for x in car_money_file_list:
+            pd.read_excel(x)
             car_money_pd.append(pd.read_excel(x))
         resultpd = pd.concat(car_money_pd)
         #print(resultpd['花费(元)'])#print(resultpd['花费(元)'])
@@ -118,7 +119,7 @@ def writer_file():
             one_date.shell_money = round(all_shell-wb_make_shell-sd_make_shell,2)
             one_date.car_money = get_money_car(str(one_date.pid))
         except:
-            pass
+            print("出错了"+str(one_date.pid))
 
     #先要把数组对象转变成为pandas对象方便透视操作
     #先把对象转化为数组数据
@@ -155,7 +156,7 @@ def writer_file():
     #去除是0的行
     #df1=df1[(df1["真实销售额"]!=0.0)|(df1["刷单"]!=0.0)|(df1["放单"]!=0.0)|(df1["直通车"]!=0.0)]
     #df1["日期"] = yes_time
-    print(df1)
+    #print(df1)
     df1 = df1[['真实销售额','刷单','放单','直通车']]
     df1.to_csv(""+man_URL+yes_time+"每个人销量文件.csv",sep=',')
 

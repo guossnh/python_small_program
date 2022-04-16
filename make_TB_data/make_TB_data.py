@@ -95,7 +95,7 @@ def add_GJP_file_for_code():
     gjp_list = []
     for x in xl_list:
         try:
-            gjp_list.append(pd.read_excel(x,skiprows=11))
+            gjp_list.append(pd.read_excel(x,skiprows=10))
         except:
             print("读取管家婆文件"+x+"出现错误")
     shell_car_data = pd.concat(gjp_list)
