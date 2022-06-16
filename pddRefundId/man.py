@@ -66,4 +66,4 @@ if __name__ == "__main__":
         print('第二天10点之前的数据有'+str(numDateTen)+'条')
         print('你需要的数据有'+str(numright)+'条，已经生成txt文件放在文件夹里边,不谢')
     else:
-        print('脑残！文件夹里边根本没有文件')
+        print('文件夹里边根本没有文件')

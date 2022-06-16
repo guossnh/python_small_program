@@ -7,24 +7,13 @@ import pandas as pd
 import glob,os,openpyxl,re
 import urllib.request   
 
-man_URL = "d:\\应用\\ceshi11\\"
+man_URL = "d:\\应用\\make_TB_data\\"
 shell_car_data = ""
-
-#获取执行程序的文件夹的路径
-def get_file_folder():
-    #fielpath = os.getcwd()
-    global man_URL
-    folder_list = os.listdir(os.path.dirname(__file__))
-    if("file" in folder_list):
-        print("修改工作路径")
-        man_URL = os.path.dirname(__file__).replace("\\","\\\\")+"\\\\"
-    else:
-        print("调试路径")
 
 
 #这个方法调用之后返回住文件夹下边的file文件夹里边的相同后缀名的文件的list
-def get_file_name_list(last_name,folder='file'):
-    return glob.glob(r''+man_URL+''+folder+'\\*.'+last_name+'')
+def get_file_name_list(last_name):
+    return glob.glob(r''+man_URL+'file\\*.'+last_name+'')
 
 #判断这个对象是刷单还是正常销售
 def return_type(x,yz):
@@ -102,7 +91,7 @@ def read_product_excle():
 def add_GJP_file_for_code():
     global shell_car_data
     print("开始读取管家婆数据")
-    xl_list = get_file_name_list("xls",'gjp')
+    xl_list = get_file_name_list("xls")
     gjp_list = []
     for x in xl_list:
         try:
@@ -119,6 +108,9 @@ def get_sku_name_from_code(code):
     #可以上边的页面 先测试再查找坐标
     global shell_car_data
     shell_car_data[shell_car_data["套餐编码"]==code].index.tolist()
+
+    
+    #判断数组是不是为空如
 
 #获取销量数据
 def get_shell_data():
@@ -150,22 +142,11 @@ def get_shell_data():
     #返回数据
     return shell_data
 
-#这块是把产品明细读取一下加入数据表
-def get_product_price_file():
-    global man_URL
-    x2 = pd.read_excel(""+man_URL+"产品明细.xlsx")
-    x2 = x2[["产品简称","成本价格"]]#只保留有需要的两列
-    x2 = x2.rename(columns={'产品简称':'产品简称2'})
-    #清理重复数据
-    x2 = x2.drop_duplicates("产品简称2")
-    return x2
-
-
-#处理数据
-def make_data(a,b):
+#生成数据
+def make_data():
     #载入数据
-    shell_data = a
-    gjp_data = b
+    shell_data = get_shell_data()
+    gjp_data = add_GJP_file_for_code()
 
     #筛选订单
     #筛选订单状态并且去除已经关闭的订单
@@ -213,22 +194,9 @@ def make_data(a,b):
             return name2
 
     shell_data = pd.merge(shell_data, x_Pname, how='left', left_on='商家备忘2', right_on='姓名代码')
-    shell_data['销售姓名'] = shell_data.apply(lambda row: easy_name_to_name(row['商家备忘2'], row['姓名']),axis=1)
+    shell_data['商家备忘3'] = shell_data.apply(lambda row: easy_name_to_name(row['商家备忘2'], row['姓名']),axis=1)
     shell_data = pd.merge(shell_data, x_product_name, how='left', left_on='套餐名', right_on='产品简称')
     shell_data = pd.merge(shell_data, x_shop_name, how='left', left_on='店铺名称', right_on='淘宝特价版店铺')
-
-    #生成几列需要的数据
-    shell_data['产品总数量'] = shell_data['套餐数量'] * shell_data['宝贝总数量']
-    shell_data["订单数量"] = 1
-
-    #通过产品简称对应一下产品进货价格
-    get_product_price_df = get_product_price_file()
-    
-    #链接两个df（通过产品简称加入价格选项）
-    shell_data = pd.merge(shell_data, get_product_price_df, how='left', left_on='产品简称', right_on='产品简称2')
-
-    shell_data['成本价格*产品总数量'] = shell_data['产品总数量'] *shell_data['成本价格']
-
 
 
 
@@ -246,10 +214,7 @@ def make_data(a,b):
     df2 = df2[["店铺名称","订单编号","商家备忘"]]
 
     #根据每个人每个店每产品统计销售额
-    df3 = shell_data.pivot_table(index=["特价版对应小组","店铺名称","销售姓名","产品名称","type"],values = ["买家实际支付金额_x","套餐数量"],aggfunc = 'sum')
-
-    df4 = shell_data.pivot_table(index=["店铺名称","销售姓名","产品名称","type","成本价格*产品总数量"],values = ["买家实际支付金额_x","产品总数量","订单数量"],aggfunc = 'sum')
-
+    df3 = shell_data.pivot_table(index=["特价版对应小组","店铺名称","商家备忘3","产品名称","type"],values = ["买家实际支付金额_x","套餐数量"],aggfunc = 'sum')
 
     #外加 ~~~看看能不能统计出销售单品的数量
     with pd.ExcelWriter(r''+man_URL+'result.xlsx') as writer:
@@ -259,25 +224,12 @@ def make_data(a,b):
         else:
             print("kong")
         df3.to_excel(writer, sheet_name='每人每店每产品销售数据',merge_cells=False)
-        df4.to_excel(writer, sheet_name='每人每店每产品销售产品发货数据',merge_cells=False)
-
-
-
-#主要的控制程序方便检测程序是哪里卡死
-def content():
-    print("判断工作路径")
-    get_file_folder()
-    print("获取销售数据和链接数据并且合并")
-    shell_data = get_shell_data()
-    print("获取管家婆数据")
-    gjp_data = add_GJP_file_for_code()
-    print("开始处理数据")
-    make_data(shell_data,gjp_data)
+        
 
 if __name__ == "__main__":
     if(kaiguan()):
         print("访问正常")
-        content()
+        make_data()
         #read_product_excle()
     else:
         print("无法获取配置文件")
