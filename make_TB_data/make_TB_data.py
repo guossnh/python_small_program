@@ -4,7 +4,7 @@
 #ps到时候需要检测文件的密码
 
 import pandas as pd
-import glob,os,openpyxl,re
+import glob,os,openpyxl,re 
 import urllib.request   
 
 man_URL = "d:\\应用\\ceshi11\\"

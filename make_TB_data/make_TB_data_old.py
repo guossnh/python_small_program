@@ -7,7 +7,7 @@ import pandas as pd
 import glob,os,openpyxl,re
 import urllib.request   
 
-man_URL = "d:\\应用\\make_TB_data\\"
+man_URL = "d:\\应用\\ceshi12\\"
 shell_car_data = ""
 
 

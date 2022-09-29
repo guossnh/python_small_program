@@ -10,7 +10,7 @@ import urllib.request
 boy_name = ""
 product_list =[]
 product_file_list =[]
-man_URL = "d:\\应用\\ceshi7\\"
+man_URL = "d:\\应用\\ceshi13\\"
 #简称和全称的字典数据
 product_ename_and_aname = {}
 #直通车数据对象
@@ -84,7 +84,7 @@ def get_sell_date_to_pd():
     def get_file_name_list():
         return glob.glob(r''+man_URL+'file\\*.csv')
     global product_file_list
-    print("读取"+str(len(product_file_list))+"个销量数据文件")
+    print("读取"+str(len(get_file_name_list()))+"个销量数据文件")
     #放入list
     for product_file in get_file_name_list():
         try:
@@ -146,7 +146,7 @@ def add_GJP_file_for_code():
     gjp_list = []
     for x in xl_list:
         try:
-            gjp_list.append(pd.read_excel(x,skiprows=11))
+            gjp_list.append(pd.read_excel(x,skiprows=10))
         except:
             print("读取管家婆文件"+x+"出现错误")
     shell_gjp_data = pd.concat(gjp_list)
@@ -202,7 +202,7 @@ def compute_result(df,shell_data):
     #首先清理管家婆数据再合并表格
     gjp_data = gjp_data.drop_duplicates("套餐编码")
     #用销量表链接管家婆数据表格
-    shell_data = pd.merge(shell_data, gjp_data, how='left', left_on='商家编码-SKU维度', right_on='套餐编码')
+    shell_data = pd.merge(shell_data, gjp_data, how='left', left_on='商家编码-规格维度', right_on='套餐编码')
 
     #根据套餐名称拆分产品数量单位三个要素需要先筛选加号的信息
     #首先先要过滤加号 然后拆分产品
@@ -264,6 +264,8 @@ def compute_result(df,shell_data):
 
     #生成新的列
     df["成本价格*产品发货数量（放+真）"] = df["成本价格"] * df["产品发货数量（放+真）"]
+
+    #shell_data.to_csv(""+man_URL+day_time('today')+"all.csv",index=False,encoding="utf-8-sig")
 
     return df
 
