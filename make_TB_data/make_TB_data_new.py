@@ -63,6 +63,24 @@ def get_file_folder():
 def get_file_name_list(last_name,folder='file'):
     return glob.glob(r''+man_URL+''+folder+'\\*.'+last_name+'')
 
+#这是几个拆分套餐名称的对应方法，
+def return_combo_name(y):
+    try:
+        return y.split("+")[0]
+    except:
+        return y
+def return_product0(z):
+    try:
+        z = re.split(r'(\d+)',z)[0]
+        return z
+    except:
+        return "后台没写套餐编码"
+def return_product1(z):
+    try:
+        z = re.split(r'(\d+)',z)[1]
+        return z
+    except:
+        return 1
 
 
 #==========================================逻辑部分==========================================
@@ -164,6 +182,92 @@ def get_sell_date_to_pd():
     #返回合并
     return pd.concat(product_file_list)
 
+#这块是通过各类数据开始计算结果
+def compute_result(df,shell_data):
+    global shell_car_data
+    #筛选需要统计的销量信息
+    shell_data = shell_data[(shell_data["订单状态"]=="交易成功")|(shell_data["订单状态"]=="买家已付款，等待卖家发货")|(shell_data["订单状态"]=="卖家已发货，等待买家确认")]
+
+    #修改数据类型方便判断
+    shell_data["子订单编号"].astype("str")
+
+    #添加商品有效销量计数，
+    shell_data["计数"] = 1
+
+
+    #获取管家婆数据
+    gjp_data = add_GJP_file_for_code()
+    #首先清理管家婆数据再合并表格
+    gjp_data = gjp_data.drop_duplicates("套餐编码")
+    #用销量表链接管家婆数据表格
+    shell_data = pd.merge(shell_data, gjp_data, how='left', left_on='商家编码', right_on='套餐编码')
+
+    #根据套餐名称拆分产品数量单位三个要素需要先筛选加号的信息
+    #首先先要过滤加号 然后拆分产品
+ 
+    shell_data['套餐名_去除合并产品'] = shell_data.套餐名称.apply(return_combo_name)
+    shell_data['产品名字'] = shell_data.套餐名_去除合并产品.apply(return_product0)
+    shell_data['产品数量'] = shell_data.套餐名_去除合并产品.apply(return_product1)
+    #套餐后缀产品数量更换数据类型
+    shell_data['产品数量'] =  shell_data['产品数量'].astype("int")
+    #转换数据类型方便做合并
+    shell_data['购买数量'] =  shell_data['购买数量'].astype("int")
+
+    shell_data["产品发货数量"] = shell_data.apply(lambda x: x["产品数量"]*x["购买数量"],axis=1)
+
+    #开始计算
+    #先修改名字  不修改的话带括号的名字在计算的时候容易出错
+    shell_data = shell_data.rename(columns={'商家实收金额(元)':'买家实际支付金额'})
+    #创建一个方法用来区分单条数据是干预，真实，网站放单
+    def return_type(x):
+        try:
+            if((x.find('V-')!= -1)|(x.find('v-')!= -1)):
+                return 1
+            elif((x.find('G-')!= -1)|(x.find('g-')!=-1)):
+                return 2
+            else:
+                return 0
+        except:
+            return 0
+    #总共销量表格加入type区分干预，真实，网站放单
+    shell_data['type'] = shell_data.主订单备注.apply(return_type)
+    #在df表里边加入各种销量数据
+    v_shell_data = shell_data[shell_data['type']==1]
+    g_shell_data = shell_data[shell_data['type']==2]
+    t_shell_data = shell_data[shell_data['type']==0]
+    df['销量'] = df.产品ID.apply(lambda x : t_shell_data.商家实收金额.loc[t_shell_data.商品id == x].sum())
+    df['干预'] = df.产品ID.apply(lambda x : g_shell_data.商家实收金额.loc[g_shell_data.商品id == x].sum())
+    df['放单'] = df.产品ID.apply(lambda x : v_shell_data.商家实收金额.loc[v_shell_data.商品id == x].sum())
+    df['订单发货数量'] = df.产品ID.apply(lambda x : shell_data.计数.loc[shell_data.商品id == x].sum())
+    #先要筛选出真实的和放单的shell_data对象
+    shell_data_v_t = shell_data[(shell_data['type']==1)|(shell_data['type']==0)]
+    df['订单发货数量（放+真）'] = df.产品ID.apply(lambda x : shell_data_v_t.计数.loc[shell_data_v_t.商品id == x].sum())
+    df['产品发货数量'] = df.产品ID.apply(lambda x : shell_data.产品发货数量.loc[shell_data.商品id == x].sum())
+    df['产品发货数量（放+真）'] = df.产品ID.apply(lambda x : shell_data_v_t.产品发货数量.loc[shell_data_v_t.商品id == x].sum())
+    #在df表里边加入直通车数据
+    #首先判断直通车数据是否为空
+    if(len(shell_car_data) ==0):
+        df['直通车'] = 0
+    else:
+        df['直通车'] = df.产品ID.apply(find_carmoney_data)
+
+    #加入全称数据可以不显示
+    df['商品全称'] = df.产品简称.apply(find_product_full_name2)
+
+    #通过产品简称对应一下产品进货价格
+    get_product_price_df = get_product_price_file()
+    
+    #链接两个df（通过产品简称加入价格选项）
+    df = pd.merge(df, get_product_price_df, how='left', left_on='产品简称', right_on='产品简称2')
+
+    #生成新的列
+    df["成本价格*产品发货数量（放+真）"] = df["成本价格"] * df["产品发货数量（放+真）"]
+
+    #shell_data.to_csv(""+man_URL+day_time('today')+"all.csv",index=False,encoding="utf-8-sig")
+
+    return df
+
+
 #==========================================控制部分==========================================
 #检测执行步骤到哪一步卡死了
 def content():
@@ -173,11 +277,6 @@ def content():
     df = read_config_xlsx_new()
     print("开始载入销量数据")
     shell_date = get_sell_date_to_pd()
-    print("载入直通车数据")
-    if(get_car_data_to_pd()):
-        print("直通车数据载入完毕")
-    else:
-        print("直通车数据是空不参与计算")
     print("开始计算")
     df = compute_result(df,shell_date)
     print("开始生成结果")
