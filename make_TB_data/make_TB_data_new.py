@@ -213,11 +213,11 @@ def compute_result(df,shell_data):
     #转换数据类型方便做合并
     shell_data['购买数量'] =  shell_data['购买数量'].astype("int")
 
-    shell_data["产品发货数量"] = shell_data.apply(lambda x: x["产品数量"]*x["购买数量"],axis=1)
+    shell_data["产品总数量"] = shell_data.apply(lambda x: x["产品数量"]*x["购买数量"],axis=1)
 
     #开始计算
     #先修改名字  不修改的话带括号的名字在计算的时候容易出错
-    shell_data = shell_data.rename(columns={'商家实收金额(元)':'买家实际支付金额'})
+    #shell_data = shell_data.rename(columns={'商家实收金额(元)':'买家实际支付金额'})
     #创建一个方法用来区分单条数据是干预，真实，网站放单
     def return_type(x):
         try:
@@ -230,26 +230,20 @@ def compute_result(df,shell_data):
         except:
             return 0
     #总共销量表格加入type区分干预，真实，网站放单
-    shell_data['type'] = shell_data.主订单备注.apply(return_type)
+    shell_data['type'] = shell_data.子订单编号.apply(return_type)
     #在df表里边加入各种销量数据
     v_shell_data = shell_data[shell_data['type']==1]
     g_shell_data = shell_data[shell_data['type']==2]
     t_shell_data = shell_data[shell_data['type']==0]
-    df['销量'] = df.产品ID.apply(lambda x : t_shell_data.商家实收金额.loc[t_shell_data.商品id == x].sum())
-    df['干预'] = df.产品ID.apply(lambda x : g_shell_data.商家实收金额.loc[g_shell_data.商品id == x].sum())
-    df['放单'] = df.产品ID.apply(lambda x : v_shell_data.商家实收金额.loc[v_shell_data.商品id == x].sum())
-    df['订单发货数量'] = df.产品ID.apply(lambda x : shell_data.计数.loc[shell_data.商品id == x].sum())
+    df['销量'] = df.产品ID.apply(lambda x : t_shell_data.买家实际支付金.loc[t_shell_data.商品id == x].sum())
+    df['干预'] = df.产品ID.apply(lambda x : g_shell_data.买家实际支付金.loc[g_shell_data.商品id == x].sum())
+    df['放单'] = df.产品ID.apply(lambda x : v_shell_data.买家实际支付金.loc[v_shell_data.商品id == x].sum())
+    df['快递数量'] = df.产品ID.apply(lambda x : shell_data.计数.loc[shell_data.商品id == x].sum())
     #先要筛选出真实的和放单的shell_data对象
     shell_data_v_t = shell_data[(shell_data['type']==1)|(shell_data['type']==0)]
-    df['订单发货数量（放+真）'] = df.产品ID.apply(lambda x : shell_data_v_t.计数.loc[shell_data_v_t.商品id == x].sum())
-    df['产品发货数量'] = df.产品ID.apply(lambda x : shell_data.产品发货数量.loc[shell_data.商品id == x].sum())
-    df['产品发货数量（放+真）'] = df.产品ID.apply(lambda x : shell_data_v_t.产品发货数量.loc[shell_data_v_t.商品id == x].sum())
-    #在df表里边加入直通车数据
-    #首先判断直通车数据是否为空
-    if(len(shell_car_data) ==0):
-        df['直通车'] = 0
-    else:
-        df['直通车'] = df.产品ID.apply(find_carmoney_data)
+    df['快递数量（放+真）'] = df.产品ID.apply(lambda x : shell_data_v_t.计数.loc[shell_data_v_t.商品id == x].sum())
+    df['产品总数量'] = df.产品ID.apply(lambda x : shell_data.产品总数量.loc[shell_data.商品id == x].sum())
+    df['产品总数量（放+真）'] = df.产品ID.apply(lambda x : shell_data_v_t.产品总数量.loc[shell_data_v_t.商品id == x].sum())
 
     #加入全称数据可以不显示
     df['商品全称'] = df.产品简称.apply(find_product_full_name2)
@@ -261,11 +255,19 @@ def compute_result(df,shell_data):
     df = pd.merge(df, get_product_price_df, how='left', left_on='产品简称', right_on='产品简称2')
 
     #生成新的列
-    df["成本价格*产品发货数量（放+真）"] = df["成本价格"] * df["产品发货数量（放+真）"]
+    df["成本价格*产品总数量（放+真）"] = df["成本价格"] * df["产品总数量（放+真）"]
 
     #shell_data.to_csv(""+man_URL+day_time('today')+"all.csv",index=False,encoding="utf-8-sig")
 
     return df
+
+#写出文件
+def write_file2(df):
+    global man_URL
+    #调整列位置开始输出
+    df = df[["店铺","产品简称","商品全称","姓名","产品ID","组","销量","干预","放单","订单发货数量","产品数量（放+真）","快递数量（放+真）","成本价格*产品总数量（放+真）"]]
+    #df.to_csv(""+man_URL+day_time('today')+"result.csv",index=False,encoding="utf-8-sig",columns=['店铺','产品简称','商品全称','姓名','产品ID','组','销量','干预','放单','直通车'])
+    df.to_csv(""+man_URL+day_time('today')+"result.csv",index=False,encoding="utf-8-sig")
 
 
 #==========================================控制部分==========================================
