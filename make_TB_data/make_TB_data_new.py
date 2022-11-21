@@ -11,7 +11,7 @@ import urllib.request
 boy_name = ""
 product_list =[]
 product_file_list =[]
-man_URL = "d:\\应用\\ceshi15\\"
+man_URL = "d:\\应用\\ceshi16\\"
 #简称和全称的字典数据
 product_ename_and_aname = {}
 
@@ -89,10 +89,11 @@ def return_product1(z):
 #清洗ID数据
 def return_clear_id(z):
     try:
-        z = re.split(r'(\d+)',z)[1]
-        return z
+        #z = re.split(r'(\d+)',z)[1]
+        z = re.findall(r'(\d+)',str(z))
+        return z[0]
     except:
-        return "商品ID错误"
+        return "商品ID出错"
 
 def return_clear_id2(z):
     try:
@@ -212,6 +213,8 @@ def compute_result(df,shell_data):
 
     #添加商品有效销量计数，
     shell_data["计数"] = 1
+    #添加统计有效快递的列
+    shell_data["有效快递"] = 1
 
 
     #获取管家婆数据
@@ -242,8 +245,18 @@ def compute_result(df,shell_data):
     #开始计算
     #先修改名字  不修改的话带括号的名字在计算的时候容易出错
     #shell_data = shell_data.rename(columns={'商家实收金额(元)':'买家实际支付金额'})
+
+    #新增加一个方法主要是排除不发货的订单，把备注标记不发货的订单的有效快递修改为0
+    def return_KD_type(c):
+        if(str(c).find("不发货") != -1):
+            return 0
+        else:
+            return 1
+    #开始修改有效快递属性
+    shell_data['有效快递'] = shell_data.主订单备注.apply(return_KD_type)
+
     #创建一个方法用来区分单条数据是干预，真实，网站放单
-    def return_type(x):
+    def return_type(x): 
         try:
             if((x.find('V-')!= -1)|(x.find('v-')!= -1)):
                 return 1
@@ -253,6 +266,7 @@ def compute_result(df,shell_data):
                 return 0
         except:
             return 0
+    
     #总共销量表格加入type区分干预，真实，网站放单
     shell_data['type'] = shell_data.主订单备注.apply(return_type)
     #在df表里边加入各种销量数据
@@ -268,6 +282,7 @@ def compute_result(df,shell_data):
     df['快递数量（放+真）'] = df.产品ID.apply(lambda x : shell_data_v_t.计数.loc[shell_data_v_t.商品id == x].sum())
     df['产品总数量'] = df.产品ID.apply(lambda x : shell_data.产品总数量.loc[shell_data.商品id == x].sum())
     df['产品总数量（放+真）'] = df.产品ID.apply(lambda x : shell_data_v_t.产品总数量.loc[shell_data_v_t.商品id == x].sum())
+    df['有效快递'] = df.产品ID.apply(lambda x : shell_data.有效快递.loc[shell_data.商品id == x].sum())
 
     #加入全称数据可以不显示
     df['商品全称'] = df.产品简称.apply(find_product_full_name2)
@@ -291,7 +306,7 @@ def compute_result(df,shell_data):
 def write_file2(df):
     global man_URL
     #调整列位置开始输出
-    df = df[["店铺","产品简称","商品全称","姓名","产品ID","组","销量","干预","放单","快递数量","产品总数量（放+真）","快递数量（放+真）","成本价格*产品总数量（放+真）"]]
+    df = df[["店铺","产品简称","商品全称","姓名","产品ID","组","销量","干预","放单","产品总数量（放+真）","有效快递","成本价格*产品总数量（放+真）"]]
     #df.to_csv(""+man_URL+day_time('today')+"result.csv",index=False,encoding="utf-8-sig",columns=['店铺','产品简称','商品全称','姓名','产品ID','组','销量','干预','放单','直通车'])
     df.to_csv(""+man_URL+day_time('today')+"result.csv",index=False,encoding="utf-8-sig")
 
