@@ -84,7 +84,7 @@ def get_sell_date_to_pd():
     #放入list
     for product_file in get_file_name_list():
         try:
-            product_file_list.append(pd.read_csv(product_file))
+            product_file_list.append(pd.read_csv(product_file,encoding='GB18030'))
         except:
             print("数据文件"+product_file+"出现错误")
     #返回合并
@@ -140,7 +140,8 @@ def read_name_data():
         print("没有发现重复的ID")
         return df
 
-
+  
+  
 
 #这里是整个数据的计算过程
 def do_data(km_data,shell_data,p_data):
@@ -179,6 +180,11 @@ def do_data(km_data,shell_data,p_data):
     #然后是shell_data和km_data的合并
     shell_data = pd.merge(shell_data, km_data, how='left', left_on='产品代码', right_on='商品商家编码')
 
+    #到出前把ID变成字符串方便会计使用
+    def change_ID_to_String(intID):
+        StrID = "'"+str(intID)
+        return StrID
+    shell_data['商品ID'] = shell_data.商品ID.apply(change_ID_to_String)
     #输出全文件，用来检查问题
     shell_data.to_csv(""+man_URL+"原始数据.csv",encoding="utf-8-sig")#生成原始数据方便差错纠错
 
