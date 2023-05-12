@@ -196,7 +196,7 @@ def write_file(new_shell_data):
     new_shell_data["订单应付金额"] = new_shell_data["订单应付金额"].astype("float64")
 
     #个人销售情况
-    df1 = new_shell_data.pivot_table(index=["姓名"],values=["订单应付金额"],aggfunc = 'sum')
+    df1 = new_shell_data.pivot_table(index=["姓名"],values=["订单应付金额","订单量"],aggfunc = 'sum')
     
     #组销售情况
     df2 = new_shell_data.pivot_table(index=["组"],values=["订单应付金额"],aggfunc = 'sum')

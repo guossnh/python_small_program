@@ -248,7 +248,7 @@ def make_data(a,b):
     #根据每个人每个店每产品统计销售额
     df3 = shell_data.pivot_table(index=["特价版对应小组","店铺名称","销售姓名","产品名称","type"],values = ["买家实际支付金额_x","套餐数量"],aggfunc = 'sum')
 
-    df4 = shell_data.pivot_table(index=["店铺名称","销售姓名","产品名称","type","成本价格*产品总数量"],values = ["买家实际支付金额_x","产品总数量","订单数量"],aggfunc = 'sum')
+    df4 = shell_data.pivot_table(index=["店铺名称","特价版对应小组","销售姓名","产品名称","type","成本价格*产品总数量"],values = ["买家实际支付金额_x","产品总数量","订单数量"],aggfunc = 'sum')
 
 
     #外加 ~~~看看能不能统计出销售单品的数量
