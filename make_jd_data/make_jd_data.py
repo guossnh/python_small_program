@@ -44,7 +44,6 @@ def kaiguan2():
     else:
         return False
 
-
 #读取配置文件分成两部分第一部分吧组数据放在一个对象了里，第二部分把所有的其他的
 def read_config_xlsx_new():
     global man_URL,product_ename_and_aname
@@ -98,6 +97,18 @@ def get_sell_date_to_pd():
     shell_data = shell_data[["订单号","商品ID","订购数量","下单时间","结算金额","订单状态","商家备注","付款确认时间"]]
     return shell_data
 
+#创建一个方法用来区分单条数据是干预，真实，网站放单
+def return_type(x):
+    try:
+        if((x.find('V-')!= -1)|(x.find('v-')!= -1)):
+            return 1
+        elif((x.find('G-')!= -1)|(x.find('g-')!=-1)):
+            return 2
+        else:
+            return 0
+    except:
+        return 0
+
 #这块是把产品明细读取一下加入数据表
 def get_product_price_file():
     global man_URL
@@ -114,8 +125,37 @@ def compute_result(shell_data,P_data):
     #清理ID数据
     shell_data['商品ID'] = shell_data['商品ID'].astype(str).str.extract(r'(\d+)')
 
+    #清理ID数据
+    P_data['产品ID'] = P_data['产品ID'].astype(str).str.extract(r'(\d+)')
+
     #添加商品有效销量计数，
     shell_data["计数"] = 1
+
+    #总共销量表格加入type区分干预，真实，网站放单
+    shell_data['type'] = shell_data.商家备注.apply(return_type)
+
+    #在df表里边加入各种销量数据
+    v_shell_data = shell_data[shell_data['type']==1]
+    g_shell_data = shell_data[shell_data['type']==2]
+    t_shell_data = shell_data[shell_data['type']==0]
+    P_data['销量'] = P_data.产品ID.apply(lambda x : t_shell_data.结算金额.loc[t_shell_data.商品ID == x].sum())
+    P_data['干预'] = P_data.产品ID.apply(lambda x : g_shell_data.结算金额.loc[g_shell_data.商品ID == x].sum())
+    P_data['放单'] = P_data.产品ID.apply(lambda x : v_shell_data.结算金额.loc[v_shell_data.商品ID == x].sum())
+    P_data['订单发货数量'] = P_data.产品ID.apply(lambda x : shell_data.计数.loc[shell_data.商品ID == x].sum())
+    #先要筛选出真实的和放单的shell_data对象
+    shell_data_v_t = shell_data[(shell_data['type']==1)|(shell_data['type']==0)]
+    P_data['订单发货数量（放+真）'] = P_data.产品ID.apply(lambda x : shell_data_v_t.计数.loc[shell_data_v_t.商品ID == x].sum())
+
+    return P_data
+
+#写出文件
+def write_file(df):
+    global man_URL
+    #调整列位置开始输出
+    df = df[["店铺","产品简称","姓名","产品ID","组","销量","干预","放单","订单发货数量","订单发货数量（放+真）"]]
+    #df.to_csv(""+man_URL+day_time('today')+"result.csv",index=False,encoding="utf-8-sig",columns=['店铺','产品简称','商品全称','姓名','产品ID','组','销量','干预','放单','直通车'])
+    df.to_csv(""+man_URL+day_time('today')+"result.csv",index=False,encoding="utf-8-sig")
+
 #======================华丽的分割线======================
 
 
@@ -129,8 +169,12 @@ if __name__ == "__main__":
         #读取ID商品对应文件
         P_data = read_config_xlsx_new()
         #开始把数据合在一块开始计算
-        compute_result(shell_data,P_data)
-        
+        df = compute_result(shell_data,P_data)
+        print("开始生成结果")
+        write_file(df)
+        print("结束了")
+        os.system('pause')
+        os.system("explorer.exe %s" % ""+man_URL+"")
 
 
 
