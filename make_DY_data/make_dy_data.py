@@ -224,6 +224,7 @@ def make_data():
     #获取姓名数据表
     name_data = read_name_data()
 
+
     #清理数据商品ID前边的空格
     #shell_data['商品ID'] = shell_data['商品ID'].astype(str).str.replace( r'^\d','')
     #name_data['产品ID'] = name_data['产品ID'].astype(str).str.replace( r'^\d','')

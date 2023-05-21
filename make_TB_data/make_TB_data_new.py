@@ -2,14 +2,19 @@
 #新版的淘宝这边的程序计算。
 #拼多多有的功能大约都要添加一下  合拍单子的情况需要根据比例计算清楚
 
+
 import pandas as pd
 import numpy as np
 import time,os,datetime,glob,sys,csv,xlrd,re
 import urllib.request
 
 
-man_URL = "d:\\应用\\ceshi15\\"
-shell_car_data = ""
+boy_name = ""
+product_list =[]
+product_file_list =[]
+man_URL = "d:\\应用\\ceshi16\\"
+#简称和全称的字典数据
+product_ename_and_aname = {}
 
 #==========================================基础部分==========================================
 #获取时间比较多就放在一块了
@@ -82,6 +87,22 @@ def return_product1(z):
     except:
         return 1
 
+#清洗ID数据
+def return_clear_id(z):
+    try:
+        #z = re.split(r'(\d+)',z)[1]
+        z = re.findall(r'(\d+)',str(z))
+        return z[0]
+    except:
+        return "商品ID出错"
+
+def return_clear_id2(z):
+    try:
+        z = str(z)
+        z = z.split(".")[0]
+        return z
+    except:
+        return "产品ID错误"
 
 #==========================================逻辑部分==========================================
 #根据简称检索全称并且返回
@@ -134,10 +155,10 @@ def add_GJP_file_for_code():
 #读取配置文件分成两部分第一部分吧组数据放在一个对象了里，第二部分把所有的其他的
 def read_config_xlsx_new():
     global man_URL,product_ename_and_aname
-    xl = pd.read_excel(""+man_URL+"产品数据表格.xlsx",None)
+    xl = pd.read_excel(""+man_URL+"产品数据表格淘宝.xlsx",None)
     xl_list =[]
     for x in xl.keys():
-        xl = pd.read_excel(""+man_URL+"产品数据表格.xlsx",x)#读取文件
+        xl = pd.read_excel(""+man_URL+"产品数据表格淘宝.xlsx",x)#读取文件
 
         if(x.find("组")!= -1):
             xl['产品ID'] = pd.to_numeric(xl['产品ID'], errors='coerce')#将产品ID转化为数字格式
@@ -176,7 +197,7 @@ def get_sell_date_to_pd():
     #放入list
     for product_file in get_file_name_list():
         try:
-            product_file_list.append(pd.read_csv(product_file))
+            product_file_list.append(pd.read_csv(product_file,encoding='GB18030'))
         except:
             print("数据文件"+product_file+"出现错误")
     #返回合并
@@ -193,6 +214,8 @@ def compute_result(df,shell_data):
 
     #添加商品有效销量计数，
     shell_data["计数"] = 1
+    #添加统计有效快递的列
+    shell_data["有效快递"] = 1
 
 
     #获取管家婆数据
@@ -201,6 +224,11 @@ def compute_result(df,shell_data):
     gjp_data = gjp_data.drop_duplicates("套餐编码")
     #用销量表链接管家婆数据表格
     shell_data = pd.merge(shell_data, gjp_data, how='left', left_on='商家编码', right_on='套餐编码')
+
+    #因为商品ID格式问题 首先清理商品IDreturn_clear_id
+    shell_data['商品id'] = shell_data.商品id.apply(return_clear_id)
+    df['产品ID'] = df.产品ID.apply(return_clear_id2)
+
 
     #根据套餐名称拆分产品数量单位三个要素需要先筛选加号的信息
     #首先先要过滤加号 然后拆分产品
@@ -218,8 +246,18 @@ def compute_result(df,shell_data):
     #开始计算
     #先修改名字  不修改的话带括号的名字在计算的时候容易出错
     #shell_data = shell_data.rename(columns={'商家实收金额(元)':'买家实际支付金额'})
+
+    #新增加一个方法主要是排除不发货的订单，把备注标记不发货的订单的有效快递修改为0
+    def return_KD_type(c):
+        if(str(c).find("不发货") != -1):
+            return 0
+        else:
+            return 1
+    #开始修改有效快递属性
+    shell_data['有效快递'] = shell_data.主订单备注.apply(return_KD_type)
+
     #创建一个方法用来区分单条数据是干预，真实，网站放单
-    def return_type(x):
+    def return_type(x): 
         try:
             if((x.find('V-')!= -1)|(x.find('v-')!= -1)):
                 return 1
@@ -229,21 +267,23 @@ def compute_result(df,shell_data):
                 return 0
         except:
             return 0
+    
     #总共销量表格加入type区分干预，真实，网站放单
-    shell_data['type'] = shell_data.子订单编号.apply(return_type)
+    shell_data['type'] = shell_data.主订单备注.apply(return_type)
     #在df表里边加入各种销量数据
     v_shell_data = shell_data[shell_data['type']==1]
     g_shell_data = shell_data[shell_data['type']==2]
     t_shell_data = shell_data[shell_data['type']==0]
-    df['销量'] = df.产品ID.apply(lambda x : t_shell_data.买家实际支付金.loc[t_shell_data.商品id == x].sum())
-    df['干预'] = df.产品ID.apply(lambda x : g_shell_data.买家实际支付金.loc[g_shell_data.商品id == x].sum())
-    df['放单'] = df.产品ID.apply(lambda x : v_shell_data.买家实际支付金.loc[v_shell_data.商品id == x].sum())
+    df['销量'] = df.产品ID.apply(lambda x : t_shell_data.买家实际支付金额.loc[t_shell_data.商品id == x].sum())
+    df['干预'] = df.产品ID.apply(lambda x : g_shell_data.买家实际支付金额.loc[g_shell_data.商品id == x].sum())
+    df['放单'] = df.产品ID.apply(lambda x : v_shell_data.买家实际支付金额.loc[v_shell_data.商品id == x].sum())
     df['快递数量'] = df.产品ID.apply(lambda x : shell_data.计数.loc[shell_data.商品id == x].sum())
     #先要筛选出真实的和放单的shell_data对象
     shell_data_v_t = shell_data[(shell_data['type']==1)|(shell_data['type']==0)]
     df['快递数量（放+真）'] = df.产品ID.apply(lambda x : shell_data_v_t.计数.loc[shell_data_v_t.商品id == x].sum())
     df['产品总数量'] = df.产品ID.apply(lambda x : shell_data.产品总数量.loc[shell_data.商品id == x].sum())
     df['产品总数量（放+真）'] = df.产品ID.apply(lambda x : shell_data_v_t.产品总数量.loc[shell_data_v_t.商品id == x].sum())
+    df['有效快递'] = df.产品ID.apply(lambda x : shell_data.有效快递.loc[shell_data.商品id == x].sum())
 
     #加入全称数据可以不显示
     df['商品全称'] = df.产品简称.apply(find_product_full_name2)
@@ -259,13 +299,15 @@ def compute_result(df,shell_data):
 
     #shell_data.to_csv(""+man_URL+day_time('today')+"all.csv",index=False,encoding="utf-8-sig")
 
+    shell_data.to_csv(""+man_URL+day_time('today')+"all.csv",index=False,encoding="utf-8-sig")
+
     return df
 
 #写出文件
 def write_file2(df):
     global man_URL
     #调整列位置开始输出
-    df = df[["店铺","产品简称","商品全称","姓名","产品ID","组","销量","干预","放单","订单发货数量","产品数量（放+真）","快递数量（放+真）","成本价格*产品总数量（放+真）"]]
+    df = df[["店铺","产品简称","商品全称","姓名","产品ID","组","销量","干预","放单","产品总数量（放+真）","有效快递","成本价格*产品总数量（放+真）"]]
     #df.to_csv(""+man_URL+day_time('today')+"result.csv",index=False,encoding="utf-8-sig",columns=['店铺','产品简称','商品全称','姓名','产品ID','组','销量','干预','放单','直通车'])
     df.to_csv(""+man_URL+day_time('today')+"result.csv",index=False,encoding="utf-8-sig")
 
