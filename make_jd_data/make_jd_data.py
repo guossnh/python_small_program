@@ -161,6 +161,7 @@ def write_file(df):
 
 if __name__ == "__main__":
     if(kaiguan2()):
+        
         print("访问正常")
         #开始判断修改操作区路径
         get_file_folder()

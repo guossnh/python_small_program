@@ -12,7 +12,7 @@ import urllib.request
 boy_name = ""
 product_list =[]
 product_file_list =[]
-man_URL = "d:\\应用\\ceshi16\\"
+man_URL = "E:\\应用\\ceshi16\\"
 #简称和全称的字典数据
 product_ename_and_aname = {}
 
@@ -288,26 +288,38 @@ def compute_result(df,shell_data):
     #加入全称数据可以不显示
     df['商品全称'] = df.产品简称.apply(find_product_full_name2)
 
-    #通过产品简称对应一下产品进货价格
-    get_product_price_df = get_product_price_file()
-    
-    #链接两个df（通过产品简称加入价格选项）
-    df = pd.merge(df, get_product_price_df, how='left', left_on='产品简称', right_on='产品简称2')
+    #判断是否包含产品明细这个文件
+    cost = True
+    if os.path.exists(""+man_URL+"产品明细.xlsx"):
+        print("存在产品明细文件开始计算产品明细")
+        #通过产品简称对应一下产品进货价格
+        get_product_price_df = get_product_price_file()
 
-    #生成新的列
-    df["成本价格*产品总数量（放+真）"] = df["成本价格"] * df["产品总数量（放+真）"]
+        #链接两个df（通过产品简称加入价格选项）
+        df = pd.merge(df, get_product_price_df, how='left', left_on='产品简称', right_on='产品简称2')
+
+        #生成新的列
+        df["成本价格*产品总数量（放+真）"] = df["成本价格"] * df["产品总数量（放+真）"]
+    else:
+        cost = False
+        print("不存在产品明细")
+
 
     #shell_data.to_csv(""+man_URL+day_time('today')+"all.csv",index=False,encoding="utf-8-sig")
 
     shell_data.to_csv(""+man_URL+day_time('today')+"all.csv",index=False,encoding="utf-8-sig")
 
-    return df
+    return df,cost
 
 #写出文件
-def write_file2(df):
+def write_file2(df,cost):
     global man_URL
-    #调整列位置开始输出
-    df = df[["店铺","产品简称","商品全称","姓名","产品ID","组","销量","干预","放单","产品总数量（放+真）","有效快递","成本价格*产品总数量（放+真）"]]
+    if(cost):
+        #调整列位置开始输出
+        df = df[["店铺","产品简称","商品全称","姓名","产品ID","组","销量","干预","放单","产品总数量（放+真）","有效快递","成本价格*产品总数量（放+真）"]]
+    else:
+        df = df[["店铺","产品简称","商品全称","姓名","产品ID","组","销量","干预","放单","产品总数量（放+真）","有效快递"]]
+    
     #df.to_csv(""+man_URL+day_time('today')+"result.csv",index=False,encoding="utf-8-sig",columns=['店铺','产品简称','商品全称','姓名','产品ID','组','销量','干预','放单','直通车'])
     df.to_csv(""+man_URL+day_time('today')+"result.csv",index=False,encoding="utf-8-sig")
 
@@ -324,7 +336,7 @@ def content():
     print("开始计算")
     df = compute_result(df,shell_date)
     print("开始生成结果")
-    write_file2(df)
+    write_file2(df[0],df[1])
     print("结束了")
     os.system('pause')
     os.system("explorer.exe %s" % ""+man_URL+"")
