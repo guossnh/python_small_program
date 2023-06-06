@@ -7,7 +7,7 @@ import pandas as pd
 import glob,os,openpyxl,re,platform,datetime
 import urllib.request  
 
-man_URL = "d:\\应用\\zzceshi1\\"
+man_URL = "e:\\应用\\zzceshi1\\"
 
 
 #======================通用方法======================
@@ -84,7 +84,7 @@ def get_sell_date_to_pd():
     #放入list
     for product_file in get_file_name_list():
         try:
-            product_file_list.append(pd.read_csv(product_file,encoding='GB18030'))
+            product_file_list.append(pd.read_csv(product_file))
         except:
             print("数据文件"+product_file+"出现错误")
     #返回合并

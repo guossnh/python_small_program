@@ -6,7 +6,7 @@ import numpy as np
 import time,os,datetime,glob,sys,csv,xlrd,re
 import urllib.request
 
-man_URL = "e:\\应用\\ceshi17\\"
+man_URL = "e:\\应用\\ceshi18\\"
 product_ename_and_aname = {}
 
 
