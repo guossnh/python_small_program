@@ -49,10 +49,11 @@ def read_config_xlsx_new():
     xl = pd.read_excel(""+man_URL+"产品数据表格.xlsx",None)
     xl_list =[]
     for x in xl.keys():
-        xl = pd.read_excel(""+man_URL+"产品数据表格.xlsx",x)#读取文件
+        xl = pd.read_excel(""+man_URL+"产品数据表格.xlsx",x,dtype=str)#读取文件
 
         if(x.find("组")!= -1):
-            xl['产品ID'] = pd.to_numeric(xl['产品ID'], errors='coerce')#将产品ID转化为数字格式
+            #暂时将下边注释掉。因为读取的数据暂时按照
+            #xl['产品ID'] = pd.to_numeric(xl['产品ID'], errors='coerce')#将产品ID转化为数字格式
 
             #开始清理数据
             xl = xl.loc[:,["店铺","产品简称","姓名","产品ID"]]#只保留有需要的四列
@@ -174,23 +175,20 @@ def add_km_file_for_code():
 
 
 #这是几个拆分套餐名称的对应方法，
-def return_combo_name(y):
-    try:
-        return y.split("+")[0]
-    except:
-        return y
+#这些是拆分字符串之后用来分裂的方法
 def return_product0(z):
     try:
-        z = re.split(r'(\d+)',z)[0]
+        z = z.split("-")[0]
         return z
     except:
         return "后台没写套餐编码"
 def return_product1(z):
     try:
-        z = re.split(r'(\d+)',z)[1]
+        z = re.split("-")[1]
         return z
     except:
         return 1
+
 
 #这块是把产品明细读取一下加入数据表
 def get_product_price_file():
@@ -209,56 +207,60 @@ def compute_result(df,shell_data):
     #添加再最前面，开始计算之前先要统计出来订单表有的ID但是商品表没有的ID，添加数据之后加入商品表
     df_id = df["产品ID"]
     shell_data_id = shell_data["商品id"]
-    #去除每个表的重复值
-    df_id = df_id.drop_duplicates("产品ID")
-    shell_data_id = shell_data_id.drop_duplicates("商品id")
+    shell_data_id.columns = ["产品ID"]
 
-    #清洗数据防止出错。
-    df_id['产品ID'] = df_id['产品ID'].astype(str).str.extract(r'(\d+)')
-    shell_data_id['商品id'] = shell_data_id['商品id'].astype(str).str.extract(r'(\d+)')
+    #清洗数据
+    shell_data_id = shell_data_id.astype(str).str.extract(r'(\d+)')
+    df_id = df_id.astype(str).str.extract(r'(\d+)')
 
-    df_id_minus = shell_data_id['商品id']|df_id['产品ID'] - shell_data_id['商品id']
-    #添加数据
-    df_id_minus["店铺"] = "没写店铺"
-    df_id_minus["产品简称"] = "没写店铺"
-    df_id_minus["姓名"] = "没写姓名"
-    #合并数据
-    df = df.concat([df,df_id_minus])
+    #求差
+    df_other_id = pd.concat([df_id,df_id,shell_data_id]).drop_duplicates(keep=False)
+    df_other_id.columns = ["产品ID"]
+    if( not df_other_id.empty): #总感觉这块有问题 但是跑出来的结果是正确的 草了
+        print("差值结果不是空如下")
+        #print(df_other_id)
+        #添加数据
+        df_other_id["店铺"] = "没写店铺"
+        df_other_id["产品简称"] = "没有简称"
+        df_other_id["姓名"] = "没写姓名"
 
+        #合并数据
+        #print(df_other_id)
+        df = pd.concat([df,df_other_id])
+    #else:
+    #    print("差值结果是空")
+    
+    #先要开始把无用的数据去掉
+    shell_data = shell_data[["订单号","订单状态","商品数量(件)","商品id","商家编码-规格维度","售后状态","商家实收金额(元)","商家备注","买家留言","支付时间"]]
 
-
-    global shell_car_data
     #筛选需要统计的销量信息
     shell_data = shell_data[(shell_data["售后状态"]=="无售后或售后取消")|(shell_data["售后状态"]=="售后处理中")]
     shell_data = shell_data[(shell_data["订单状态"]=="待发货")|(shell_data["订单状态"]=="已发货，待签收")|(shell_data["订单状态"]=="已签收")]
 
-    #修改数据类型方便判断
-    shell_data["商品id"].astype("str")
-
     #添加商品有效销量计数，
     shell_data["计数"] = 1
 
-    #这块有问题先注释掉，因为商家编码对应问题
+    #首先要拆分套餐编码，生成两列数据然后再合并
+    #先修改名字否则报错
+    shell_data =shell_data.rename(columns={"商家编码-规格维度":"商家编码规格维度"})
+    #print(shell_data.columns.tolist())
+    shell_data['产品代码'] = shell_data.商家编码规格维度.apply(return_product0)
+    shell_data['产品代码对应数量'] = shell_data.商家编码规格维度.apply(return_product1)
 
-    ##获取管家婆数据
-    #gjp_data = add_km_file_for_code()
-    ##首先清理管家婆数据再合并表格
-    #gjp_data = gjp_data.drop_duplicates("商品商家编码")
-    ##用销量表链接管家婆数据表格
-    #shell_data = pd.merge(shell_data, gjp_data, how='left', left_on='商家编码-商品维度', right_on='商品商家编码')
-
-    #根据套餐名称拆分产品数量单位三个要素需要先筛选加号的信息
-    #首先先要过滤加号 然后拆分产品
+    #获取快卖数据并且链接到主表
+    km_data = add_km_file_for_code()
+    #首先清理快卖数据再合并表格
+    km_data = km_data.drop_duplicates("商品商家编码")
+    #用销量表链接快卖数据表格
+    shell_data = pd.merge(shell_data, km_data, how='left', left_on='产品代码', right_on='商品商家编码')
+    df = pd.merge(df, km_data, how='left', left_on='产品简称', right_on='商品商家编码')
  
-    shell_data['套餐名_去除合并产品'] = shell_data.套餐名称.apply(return_combo_name)
-    shell_data['产品名字'] = shell_data.套餐名_去除合并产品.apply(return_product0)
-    shell_data['产品数量'] = shell_data.套餐名_去除合并产品.apply(return_product1)
     #套餐后缀产品数量更换数据类型
-    shell_data['产品数量'] =  shell_data['产品数量'].astype("int")
+    shell_data['产品代码对应数量'] =  shell_data['产品代码对应数量'].astype("int")
     #转换数据类型方便做合并
     shell_data['商品数量(件)'] =  shell_data['商品数量(件)'].astype("int")
 
-    shell_data["产品发货数量"] = shell_data.apply(lambda x: x["产品数量"]*x["商品数量(件)"],axis=1)
+    shell_data["产品发货数量"] = shell_data.apply(lambda x: x["产品代码对应数量"]*x["商品数量(件)"],axis=1)
 
     #开始计算
     #先修改名字  不修改的话带括号的名字在计算的时候容易出错
@@ -276,6 +278,16 @@ def compute_result(df,shell_data):
             return 0
     #总共销量表格加入type区分干预，真实，网站放单
     shell_data['type'] = shell_data.商家备注.apply(return_type)
+
+    #shell_data.to_csv(""+man_URL+day_time('today')+"shell_data.csv",index=False,encoding="utf-8-sig")
+    #修改数据类型
+    #df["产品ID"] = df["产品ID"].astype(str).str.extract(r'(\d+)')
+    #shell_data["商品id"] = shell_data["商品id"].astype(str).str.extract(r'(\d+)')
+    df["产品ID"] = df["产品ID"].astype(str)
+    shell_data["商品id"] = shell_data["商品id"].astype(str)
+    #print(df.dtypes)
+    #print(shell_data.dtypes)
+    #df.to_csv(""+man_URL+day_time('today')+"dfresult.csv",index=False,encoding="utf-8-sig")
     #在df表里边加入各种销量数据
     v_shell_data = shell_data[shell_data['type']==1]
     g_shell_data = shell_data[shell_data['type']==2]
@@ -304,7 +316,7 @@ def compute_result(df,shell_data):
 def write_file2(df):
     global man_URL
     #调整列位置开始输出
-    df = df[["店铺","产品简称","姓名","产品ID","组","直通车","销量","干预","放单","订单发货数量","产品发货数量（放+真）","订单发货数量（放+真）"]]
+    df = df[["店铺","商品名称","姓名","产品ID","组","直通车","销量","干预","放单","订单发货数量","产品发货数量（放+真）","订单发货数量（放+真）"]]
     #df.to_csv(""+man_URL+day_time('today')+"result.csv",index=False,encoding="utf-8-sig",columns=['店铺','产品简称','商品全称','姓名','产品ID','组','销量','干预','放单','直通车'])
     df.to_csv(""+man_URL+day_time('today')+"result.csv",index=False,encoding="utf-8-sig")
 
