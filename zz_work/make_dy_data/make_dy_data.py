@@ -7,7 +7,7 @@ import pandas as pd
 import glob,os,openpyxl,re,platform,datetime
 import urllib.request  
 
-man_URL = "e:\\应用\\zzceshi1\\"
+man_URL = "d:\\应用\\zzceshi1\\"
 
 
 #======================通用方法======================
@@ -88,7 +88,10 @@ def get_sell_date_to_pd():
         except:
             print("数据文件"+product_file+"出现错误")
     #返回合并
-    return pd.concat(product_file_list)
+    
+    all_shell = pd.concat(product_file_list)
+    
+    return all_shell
 
 #读取读取并且合并多个快卖下载的文件
 def add_km_file_for_code():
@@ -115,7 +118,7 @@ def read_name_data():
     xl = pd.read_excel(""+man_URL+"dy产品数据表格.xlsx",None)
     xl_list =[]
     for x in xl.keys():
-        xl = pd.read_excel(""+man_URL+"dy产品数据表格.xlsx",x)#读取文件
+        xl = pd.read_excel(""+man_URL+"dy产品数据表格.xlsx",x,dtype=str)#读取文件
 
         if(x.find("组")!= -1):
             #xl['产品ID'] = pd.to_numeric(xl['产品ID'], errors='coerce')#将产品ID转化为数字格式
@@ -140,8 +143,7 @@ def read_name_data():
         print("没有发现重复的ID")
         return df
 
-  
-  
+
 
 #这里是整个数据的计算过程
 def do_data(km_data,shell_data,p_data):
@@ -164,27 +166,30 @@ def do_data(km_data,shell_data,p_data):
 
     #增加一列方便统计数量
     shell_data["订单量"] = 1
-
+    
     #融合三个表并且根据商品ID去重
     #首先是shell_data 和 p_data
     #转换数据类型防止出错
+    
     shell_data['商品ID'] = shell_data['商品ID'].astype(str).str.extract(r'(\d+)')
-    p_data['产品ID'] = p_data['产品ID'].astype(str).str.extract(r'(\d+)')
-
+    p_data['产品ID'] = p_data['产品ID'].astype(str).str.extract(r'(\d+)',expand=False)
     #先清理姓名表重复数据再合并
     p_data = p_data.drop_duplicates("产品ID")
     #用姓名表格链接 产品表格然后就可以了
     shell_data = pd.merge(shell_data, p_data, how='left', left_on='商品ID', right_on='产品ID')
 
+    #先要清理快麦数据。
+    km_data = km_data.drop_duplicates("商品商家编码")
 
     #然后是shell_data和km_data的合并
     shell_data = pd.merge(shell_data, km_data, how='left', left_on='产品代码', right_on='商品商家编码')
-
     #到出前把ID变成字符串方便会计使用
     def change_ID_to_String(intID):
         StrID = "'"+str(intID)
         return StrID
     shell_data['商品ID'] = shell_data.商品ID.apply(change_ID_to_String)
+    shell_data['商品ID'] = shell_data.商品ID.apply(change_ID_to_String)
+    
     #输出全文件，用来检查问题
     shell_data.to_csv(""+man_URL+"原始数据.csv",encoding="utf-8-sig")#生成原始数据方便差错纠错
 
@@ -217,7 +222,7 @@ def write_file(new_shell_data):
 #======================华丽的分割线======================
 
 if __name__ == "__main__":
-    if(kaiguan2()):
+    if(1):
         print("访问正常")
         #开始判断修改操作区路径
         get_file_folder()
