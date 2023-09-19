@@ -9,7 +9,7 @@ import urllib.request
 boy_name = ""
 product_list =[]
 product_file_list =[]
-man_URL = "E:\\应用\\ceshi2\\"
+man_URL = "E:\\应用\\zzceshi4\\"
 product_link_in_list = []#这个是所有产品信息对象的存储
 product_name_and_easy_name_list = []
 
@@ -105,6 +105,8 @@ def writer_file():
     #all_date["商家备注"] = all_date["商家备注"].str.split(";").str[-1]
     for one_date in read_config_xlsx():
         try:
+            if(all_date["商品id"]=="497936569681"):
+                print("123")
             all_shell = all_date[(all_date["商品id"]==one_date.pid)]["商家实收金额(元)"].sum()
             wb_make_shell = all_date[(all_date["商品id"]==one_date.pid)&((all_date["商家备注"].str.contains("V-"))| (all_date["商家备注"].str.contains("v-")))]["商家实收金额(元)"].sum()
             sd_make_shell = all_date[(all_date["商品id"]==one_date.pid)&((all_date["商家备注"].str.contains("G-"))|(all_date["商家备注"].str.contains("g-")))]["商家实收金额(元)"].sum()

@@ -3,7 +3,7 @@
 #主要是拼合文件 xls 文件的拼合
 
 import pandas as pd
-import glob,xlrd,xlwt,openpyxl
+import glob,xlrd,openpyxl
 import urllib.request
 
 man_URL = "c:\\do_data\\"
@@ -33,6 +33,9 @@ def kaiguan():
 #开始写入文件
 def writer_file():
     asd = get_list()
+    asd = asd[["商品名称","商品ID","推广单元","花费(元)","交易额(元)","实际投产比","成交笔数","每笔成交花费(元)","每笔成交金额(元)"]]
+    asd = asd.reset_index(drop=True)
+    asd = asd.drop(index = asd[asd["商品名称"]=="总计"].index.tolist())
     asd.to_excel(""+man_URL+"all.xlsx")
 
 if __name__ == "__main__":
@@ -40,4 +43,4 @@ if __name__ == "__main__":
         print("写入文件正常")
         writer_file()
     else:
-        print("写入文件异常")
+        pass
