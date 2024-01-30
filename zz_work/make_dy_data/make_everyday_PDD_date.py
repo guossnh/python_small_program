@@ -10,7 +10,7 @@ import urllib.request
 boy_name = ""
 product_list =[]
 product_file_list =[]
-man_URL = "E:\\应用\\ceshi2\\"
+man_URL = "D:\\GWZ\\ceshi1\\"
 #简称和全称的字典数据
 product_ename_and_aname = {}
 #直通车数据对象
@@ -213,9 +213,20 @@ def compute_result(df,shell_data):
     shell_data_id = shell_data_id.astype(str).str.extract(r'(\d+)')
     df_id = df_id.astype(str).str.extract(r'(\d+)')
 
+    df_id = df_id.drop_duplicates(keep='first')
+    shell_data_id = shell_data_id.drop_duplicates(keep='first')
+
+
     #求差
     df_other_id = pd.concat([df_id,df_id,shell_data_id]).drop_duplicates(keep=False)
+
     df_other_id.columns = ["产品ID"]
+
+
+
+
+    #df_other_id.to_csv(""+man_URL+"1.csv",index=False,encoding="utf-8-sig")
+
     if( not df_other_id.empty): #总感觉这块有问题 但是跑出来的结果是正确的 草了
         print("差值结果不是空如下")
         #print(df_other_id)
@@ -239,7 +250,6 @@ def compute_result(df,shell_data):
 
     #添加商品有效销量计数，
     shell_data["计数"] = 1
-
     #首先要拆分套餐编码，生成两列数据然后再合并
     #先修改名字否则报错
     shell_data =shell_data.rename(columns={"商家编码-规格维度":"商家编码规格维度"})
@@ -279,7 +289,7 @@ def compute_result(df,shell_data):
     #总共销量表格加入type区分干预，真实，网站放单
     shell_data['type'] = shell_data.商家备注.apply(return_type)
 
-    #shell_data.to_csv(""+man_URL+day_time('today')+"shell_data.csv",index=False,encoding="utf-8-sig")
+    shell_data.to_csv(""+man_URL+day_time('today')+"shell_data.csv",index=False,encoding="utf-8-sig")
     #修改数据类型
     #df["产品ID"] = df["产品ID"].astype(str).str.extract(r'(\d+)')
     #shell_data["商品id"] = shell_data["商品id"].astype(str).str.extract(r'(\d+)')
