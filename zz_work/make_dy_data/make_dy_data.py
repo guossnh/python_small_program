@@ -198,6 +198,9 @@ def do_data(km_data,shell_data,p_data):
 
 #写出文件
 def write_file(new_shell_data):
+    #转换数据类型防止前卫分隔符出现问题
+    new_shell_data["订单应付金额"] = pd.to_numeric(new_shell_data["订单应付金额"],errors='coerce')
+    
     new_shell_data["订单应付金额"] = new_shell_data["订单应付金额"].astype("float64")
 
     #个人销售情况
