@@ -10,7 +10,7 @@ import urllib.request
 boy_name = ""
 product_list =[]
 product_file_list =[]
-man_URL = "E:\\应用\\ceshi2\\"
+man_URL = "E:\\应用\\zzceshi6\\"
 #简称和全称的字典数据
 product_ename_and_aname = {}
 #直通车数据对象
@@ -162,7 +162,7 @@ def add_km_file_for_code():
         return glob.glob(r''+man_URL+'km\\*.'+last_name+'')
 
     print("开始读取快卖数据")
-    xl_list = get_file_name_list("csv")
+    xl_list = get_file_name_list("csv") 
     gjp_list = []
     for x in xl_list:
         try:

@@ -9,7 +9,7 @@ import urllib.request
 boy_name = ""
 product_list =[]
 product_file_list =[]
-man_URL = "E:\\应用\\zzceshi4\\"
+man_URL = "E:\\应用\\zzceshi6\\"
 product_link_in_list = []#这个是所有产品信息对象的存储
 product_name_and_easy_name_list = []
 
@@ -105,15 +105,14 @@ def writer_file():
     #all_date["商家备注"] = all_date["商家备注"].str.split(";").str[-1]
     for one_date in read_config_xlsx():
         try:
-            if(all_date["商品id"]=="497936569681"):
-                print("123")
             all_shell = all_date[(all_date["商品id"]==one_date.pid)]["商家实收金额(元)"].sum()
             wb_make_shell = all_date[(all_date["商品id"]==one_date.pid)&((all_date["商家备注"].str.contains("V-"))| (all_date["商家备注"].str.contains("v-")))]["商家实收金额(元)"].sum()
             sd_make_shell = all_date[(all_date["商品id"]==one_date.pid)&((all_date["商家备注"].str.contains("G-"))|(all_date["商家备注"].str.contains("g-")))]["商家实收金额(元)"].sum()
             one_date.wb_money = round(wb_make_shell,2)
             one_date.sd_money = round(sd_make_shell,2)
             one_date.shell_money = round(all_shell-wb_make_shell-sd_make_shell,2)
-            one_date.car_money = get_money_car(str(one_date.pid))
+            #one_date.car_money = get_money_car(str(one_date.pid))
+            one_date.car_money = 0
             one_date.count = len(all_date[(all_date["商品id"]==one_date.pid)])
         except:
             pass
@@ -132,7 +131,7 @@ def writer_file():
             writer.writerow([i.pname,i.group,i.shop,i.pid,full_name,i.shell_money,i.sd_money,i.wb_money,i.car_money,i.count])
 
 if __name__ == "__main__":
-    if(kaiguan()):
+    if(1):
         print("配置文件正常")
         writer_file()
     else:

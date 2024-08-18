@@ -9,7 +9,7 @@ import urllib.request
 boy_name = ""
 product_list =[]
 product_file_list =[]
-man_URL = "d:\\应用\\ceshi10\\"
+man_URL = "d:\\make_everyday_PDD_date_for_YY\\"
 product_link_in_list = []#这个是所有产品信息对象的存储
 product_name_and_easy_name_list = []
 
@@ -41,7 +41,6 @@ def get_money_car(productID):
     try:
         car_money_file_list = glob.glob(r''+man_URL+'file\\*.xls')
         for x in car_money_file_list:
-            pd.read_excel(x)
             car_money_pd.append(pd.read_excel(x))
         resultpd = pd.concat(car_money_pd)
         #print(resultpd['花费(元)'])#print(resultpd['花费(元)'])
@@ -79,8 +78,7 @@ def find_product_full_name(easyname):
     for x in product_name_and_easy_name_list:
         if(x.ename==easyname):
             return x.name
-        else:
-            return easyname
+    return "没有名字"
 
 #这个是匹配每一个产品简称和全程的类
 class product_name_and_easy_name:
@@ -102,11 +100,10 @@ class product_link_in:
 
 def writer_file():
     global boy_name
-    
     result_file = make_all_file()
     result_file = result_file.drop_duplicates(['订单号'])
     all_date = result_file[(result_file["售后状态"]=="无售后或售后取消")|(result_file["售后状态"]=="售后处理中")]
-    all_date = all_date[(all_date["订单状态"]=="待发货")|(all_date["订单状态"]=="已发货，待签收")|(all_date["订单状态"]=="已签收")]
+    all_date = all_date[(all_date["订单状态"]=="待发货")|(all_date["订单状态"]=="已发货，待签收")|(all_date["订单状态"]=="已签收")|(all_date["订单状态"]=="已发货，待收货")|(all_date["订单状态"]=="已收货")]
     #all_date["商家备注"] = all_date["商家备注"].str.split(";").str[-1]
     all_date["商品id"].astype("str")
     for one_date in read_config_xlsx():
@@ -119,7 +116,7 @@ def writer_file():
             one_date.shell_money = round(all_shell-wb_make_shell-sd_make_shell,2)
             one_date.car_money = get_money_car(str(one_date.pid))
         except:
-            print("出错了"+str(one_date.pid))
+            pass
 
     #先要把数组对象转变成为pandas对象方便透视操作
     #先把对象转化为数组数据
@@ -156,22 +153,20 @@ def writer_file():
     #去除是0的行
     #df1=df1[(df1["真实销售额"]!=0.0)|(df1["刷单"]!=0.0)|(df1["放单"]!=0.0)|(df1["直通车"]!=0.0)]
     #df1["日期"] = yes_time
-    #print(df1)
+    print(df1)
     df1 = df1[['真实销售额','刷单','放单','直通车']]
     df1.to_csv(""+man_URL+yes_time+"每个人销量文件.csv",sep=',')
 
-
-    #这块内容不需要先不要生成了
-    #with open(""+man_URL+"result.csv","w",newline = '') as csvfile: 
-    #    writer = csv.writer(csvfile)
-    #    writer.writerow(["姓名","组","店","产品ID","产品全称","销量","刷单","放单","直通车"])
-    #    for i in product_link_in_list:
-    #        #if((i.shell_money==0) & (i.sd_money==0)):
-    #        #    pass
-    #        #else:
-    #        #    writer.writerow()
-    #        full_name = find_product_full_name(i.ename)
-    #        writer.writerow([i.pname,i.group,i.shop,i.pid,full_name,i.shell_money,i.sd_money,i.wb_money,i.car_money])
+    with open(""+man_URL+"result.csv","w",newline = '') as csvfile: 
+        writer = csv.writer(csvfile)
+        writer.writerow(["姓名","组","店","产品ID","产品全称","销量","刷单","放单","直通车"])
+        for i in product_link_in_list:
+            #if((i.shell_money==0) & (i.sd_money==0)):
+            #    pass
+            #else:
+            #    writer.writerow()
+            full_name = find_product_full_name(i.ename)
+            writer.writerow([i.pname,i.group,i.shop,i.pid,full_name,i.shell_money,i.sd_money,i.wb_money,i.car_money])
 
 if __name__ == "__main__":
     if(kaiguan()):
