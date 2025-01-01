@@ -151,6 +151,9 @@ def merge_all_data():
         merged_data['商品ID'] = merged_data['商品ID'].astype(str)
         product_data['产品ID'] = product_data['产品ID'].astype(str)
 
+        # 对product_data根据产品ID去重
+        product_data = product_data.drop_duplicates(subset=['产品ID'], keep='first')
+
         # 根据 '商品ID' 和 '产品ID' 进行合并
         merged_data = pd.merge(merged_data, product_data, left_on='商品ID', right_on='产品ID', how='left')
 
@@ -181,20 +184,32 @@ def process_package_name(merged_data):
         return name.split('+')[0].strip()
     
     def extract_name_and_quantity(name):
-        if pd.isna(name):
+        try:
+            if pd.isna(name):
+                return pd.Series({'套餐产品名称': None, '套餐数量': None})
+            
+            import re
+            # 查找第一个数字
+            match = re.search(r'(\d+).*$', str(name).strip())
+            if match:
+                # 获取数字的起始位置
+                num_start = name.find(match.group(1))
+                # 尝试转换数字
+                try:
+                    quantity = int(match.group(1))
+                    product_name = name[:num_start].strip()
+                    if product_name:  # 确保产品名称不为空
+                        return pd.Series({'套餐产品名称': product_name, '套餐数量': quantity})
+                except ValueError:
+                    return pd.Series({'套餐产品名称': None, '套餐数量': None})
+            
+            # 如果没有找到有效的数字或产品名称，返回空值
             return pd.Series({'套餐产品名称': None, '套餐数量': None})
             
-        # 使用新的正则表达式匹配格式：产品名+数字+盒
-        import re
-        match = re.search(r'^(.*?)(\d+)盒$', name.strip())
-        
-        if match:
-            product_name = match.group(1).strip()  # 产品名称
-            quantity = int(match.group(2))         # 数量
-            return pd.Series({'套餐产品名称': product_name, '套餐数量': quantity})
-        else:
-            # 如果没有找到匹配模式，则保持原名称，数量设为1
-            return pd.Series({'套餐产品名称': name.strip(), '套餐数量': 1})
+        except Exception as e:
+            # 如果处理过程中出现任何错误，返回空值
+            print(f"处理数据时出错: {e}, 数据: {name}")
+            return pd.Series({'套餐产品名称': None, '套餐数量': None})
 
     # 创建数据副本
     merged_data = merged_data.copy()
@@ -235,6 +250,9 @@ def get_product_details():
             print("警告：产品明细表过滤后没有有效数据！")
             return None
             
+        # 根据产品简称去除重复行，保留第一次出现的记录
+        product_details = product_details.drop_duplicates(subset=['产品简称'], keep='first')
+            
         return product_details
     except Exception as e:
         print(f"读取产品明细文件时出错: {e}")
@@ -270,12 +288,16 @@ def main():
             'type': '类型',
             '总数量': '货物总数量',
             '有效订单数量': '有效快递数量',
-            '订单应付金额': '有效销售额'
+            '订单应付金额': '有效销售额',
         })
         
         # 导出原始数据到CSV文件
         output_csv_path = os.path.join(get_program_directory(), '结果.csv')
         try:
+            # 将主订单编号列转换为字符串格式
+            if '主订单编号' in merged_data.columns:
+                merged_data['主订单编号'] = merged_data['主订单编号'].astype(str)
+            
             merged_data.to_csv(output_csv_path, index=False, encoding='utf-8-sig')
             print(f"原始数据已成功导出到: {output_csv_path}")
         except Exception as e:
@@ -283,6 +305,7 @@ def main():
 
         # 创建数据透视表
         try:
+            # 创建详细数据透视表
             pivot_table = pd.pivot_table(
                 merged_data,
                 index=['店铺', '姓名', '组', '类型', '产品简称'],  # 分组字段
@@ -295,9 +318,20 @@ def main():
                 }
             )
 
+            # 创建总表数据透视表
+            summary_table = pd.pivot_table(
+                merged_data,
+                index=['店铺', '组', '类型'],  # 分组字段
+                values=['有效销售额'],        # 只需要有效销售额
+                aggfunc={'有效销售额': 'sum'} # 求和
+            )
+
             # 导出数据透视表到Excel文件
             output_excel_path = os.path.join(get_program_directory(), '结果.xlsx')
-            pivot_table.to_excel(output_excel_path)
+            with pd.ExcelWriter(output_excel_path) as writer:
+                pivot_table.to_excel(writer, sheet_name='详细数据')  # 第一个sheet
+                summary_table.to_excel(writer, sheet_name='总表')    # 第二个sheet
+            
             print(f"数据透视表已成功导出到: {output_excel_path}")
         except Exception as e:
             print(f"创建或导出数据透视表时出错: {e}")
@@ -305,6 +339,9 @@ def main():
         print("数据处理完成！")
     else:
         print("合并数据时出错！")
+
 # 运行主函数
 if __name__ == "__main__":
     main()
+    # 添加等待用户输入
+    input("\n按回车键退出程序...")
