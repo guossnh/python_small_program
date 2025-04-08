@@ -102,7 +102,7 @@ def filter_sales_data(sales_data):
         return sales_data
     
     # 订单状态筛选
-    order_status = ['买家已付款', '卖家已发货，交易成功', '卖家已发货，等待买家确认']
+    order_status = ['买家已付款', '卖家已发货', '交易成功', '卖家已发货，等待买家确认']
     
     # 退款状态筛选
     refund_status = ['买家已经申请退款，等待卖家同意', '卖家已经同意退款，等待买家退货', '没有申请退款', '退款关闭']

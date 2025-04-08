@@ -64,8 +64,19 @@ def process_sales_data():
     # 逐个读取文件并处理
     for file in csv_files:
         try:
-            # 尝试读取文件时指定编码格式
-            df = pd.read_csv(file, encoding='gbk')  # 你可以尝试其他编码，如'gb2312'、'utf-16'
+            # 尝试使用多种编码格式读取文件
+            def read_csv_with_multiple_encodings(file):
+                encodings = ['gbk', 'gb2312', 'utf-8']  # 支持的编码列表
+                for encoding in encodings:
+                    try:
+                        df = pd.read_csv(file, encoding=encoding)
+                        print(f"文件 {file} 使用 {encoding} 编码成功读取。")
+                        return df
+                    except UnicodeDecodeError:
+                        continue  # 如果当前编码失败，尝试下一个编码
+                raise ValueError(f"无法使用任何已知编码读取文件 {file}")  # 如果所有编码都失败，抛出异常
+            
+            df = read_csv_with_multiple_encodings(file)
 
             # 保留需要的列
             df_filtered = df[required_columns]
